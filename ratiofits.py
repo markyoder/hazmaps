@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mpd
 import mpl_toolkits.basemap as bmp
 import scipy
+import numpy
 import operator
 import math
 import glob
@@ -31,6 +32,8 @@ def doTohoku():
 	return (A,B,C)
 
 def get_rbratios_tohoku(mc=5.0, todt=mhp.dtm.datetime.now(mhp.pytz.timezone('UTC')), winlen=None, avlen=None, targmag=9.0, ndithers=10, nContours=nContours1, bigmag=7.0, lons=[135., 148.5], lats=[30., 45.25], refreshcat=True, dt0=mhp.dtm.datetime(1990,1,1, tzinfo=mhp.pytz.timezone('UTC')), catname='cats/tohoku_rfits.cat', mt=7.6):
+	#
+	# fetch and return a standard rb-ratio set.
 	#
 	if refreshcat==True:
 		#cl1=yp.catfromANSS(lon=[92.0, 106.0],lat=[-9.0, 10.0], minMag=3.5, dates0=[yp.dtm.datetime(1990,1,1, tzinfo=pytz.timezone('UTC')), yp.dtm.datetime(2012,6,19, tzinfo=pytz.timezone('UTC'))], fout=catname)
@@ -338,10 +341,21 @@ def plot_ratio_fits(fit_dict, new_figs=False, fignum0=2):
 		y_b = map(operator.itemgetter(1), this_set['fit_prams'])
 		y_chi = map(operator.itemgetter(2), this_set['fit_prams'])
 		#
-		plt.plot(X[-len(y_r):], y_r, '-', label='ratios')
-		plt.plot(X[-len(y_chi):], y_chi, '--', label='chisqr: %.4f/%.4f/%.4f' % (sum(y_chi), scipy.mean(y_chi), len(y_chi)))
+		plt.semilogy(X[-len(y_r):], y_r, '-', label='ratios')
+		plt.semilogy(X[-len(y_chi):], y_chi, '--', label='chisqr: %.4f/%.4f/%.4f' % (sum(y_chi), scipy.mean(y_chi), len(y_chi)))
+		plt.semilogy([X[-len(y_chi)], X[-1]], [1., 1.], 'k-', lw=2, zorder=1)
 		plt.legend(loc=0, numpoints=1)
 		plt.title('raw fits')
+		#
+		fnum+=1
+		plt.figure(fnum)
+		plt.clf()
+		plt.title('raw lacunarity')
+		#y_lac = numpy.array(y_r[-len(y_chi):])/numpy.array(y_chi)
+		y_lac = [math.log10(y_r[-len(y_chi):][i])/ychi for i, ychi in enumerate(y_chi)]
+		plt.plot(X[-len(y_chi):], y_lac, '-', lw=2, label='r/chi')
+		plt.plot([X[-len(y_chi)], X[-1]], [0., 0.], 'k-', lw=2, zorder=1)
+		plt.legend(loc=0)
 		#
 		'''
 		fnum+=1
@@ -370,11 +384,23 @@ def plot_ratio_fits(fit_dict, new_figs=False, fignum0=2):
 		y_chi = map(operator.itemgetter(2), this_set['mean_fit_prams'])
 		#
 		#
-		
-		plt.plot(X[-len(y_r):], y_r, '-', label='ratios')
-		plt.plot(X[-len(y_chi):], y_chi, '--', label='chisqr: %.4f/%.4f/%.4f' % (sum(y_chi), scipy.mean(y_chi), len(y_chi)))
+		plt.semilogy(X[-len(y_r):], y_r, '-', label='ratios')
+		plt.semilogy(X[-len(y_chi):], y_chi, '--', label='chisqr: %.4f/%.4f/%.4f' % (sum(y_chi), scipy.mean(y_chi), len(y_chi)))
+		plt.semilogy([X[-len(y_chi)], X[-1]], [1., 1.], 'k-', lw=2, zorder=1)
 		plt.legend(loc=0, numpoints=1)
 		plt.title('mean-fits')
+		#
+		#
+		fnum+=1
+		plt.figure(fnum)
+		plt.clf()
+		plt.title('mean lacunarity')
+		#y_lac = numpy.array(y_r[-len(y_chi):])/numpy.array(y_chi)
+		y_lac = [math.log10(y_r[-len(y_chi):][i])/ychi for i, ychi in enumerate(y_chi)]
+		plt.plot(X[-len(y_chi):], y_lac, '-', lw=2, label='r/chi')
+		plt.plot([X[-len(y_chi)], X[-1]], [0., 0.], 'k-', lw=2, zorder=1)
+		plt.legend(loc=0)
+		#
 		#
 		'''
 		fnum+=1
