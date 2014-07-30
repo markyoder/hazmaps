@@ -13,12 +13,15 @@ import glob
 import os
 import datetime as dtm
 import pytz
+import random
 
 from geographiclib.geodesic import Geodesic as ggp
 import rbTectoFigs as rfp
 import linefit
 
 nContours1=15
+
+tohoku_prams = {'mc':5.0, 'todt':mhp.dtm.datetime.now(mhp.pytz.timezone('UTC')), 'winlen':None, 'avlen':None, 'targmag':9.0, 'ndithers':10, 'nContours':nContours1, 'bigmag':7.0, 'lons':[135., 148.5], 'lats':[30., 45.25], 'refreshcat':True, 'dt0':mhp.dtm.datetime(1990,1,1, tzinfo=mhp.pytz.timezone('UTC')), 'catname':'cats/tohoku_rfits.cat', 'mt':7.6}
 
 def doTohoku():
 	A = get_rbratios_tohoku()
@@ -84,7 +87,10 @@ def get_ratio_fits(ratios=None, Nfits=[1,5], ratiocol=4, meancol=5, t_col=1):
 		for i in xrange(n, len(ratios)):
 			these_r = r_vals[(i-n):i]
 			these_rm = r_vals_mean[(i-n):i]
-			these_x = map(mpd.date2num, X_vals[(i-n):i])
+			if type(X_vals[0])==type(dtm.datetime.now()):
+				these_x = map(mpd.date2num, X_vals[(i-n):i])
+			else:
+				these_x = X_vals[(i-n):i]
 			these_p = (0., 0.)
 			#
 			#meanval = scipy.mean(these_r)	# or, it's faster to do a moving mean; mean+=(x_i-x_{i-n})
@@ -125,11 +131,19 @@ def get_ratio_fits(ratios=None, Nfits=[1,5], ratiocol=4, meancol=5, t_col=1):
 	return fitsets
 	#
 #
-def get_averaging_set(ratios=None, ave_lens=[5, 500], x_col=1, ratio_col=4):
+def get_averaging_set(ratios=None, ave_lens=[5, 500], x_col=1, ratio_col=4, fout='ratio_fit_data/aveset.csv'):
 	# get plot of fit quality as a function of ave-len
-	if ratios==None: return None
+	if ratios==None:
+		ratios = get_rbratios_tohoku()
+		# return None
 	#
 	if ave_lens[0]>ave_lens[1]: ave_lens.reverse()
+	#
+	if fout!=None:
+		f=open(fout, 'w')
+		f.write('#rb-ration fit sets for... some data set. ave_lens: %s, x_col=%d, ratio_col=%d\n' % (str(ave_lens), x_col, ratio_col))
+		f.write('#ave_len\tmean_var\tAIC\ttotal_var\ts/n\tNdoF\n')
+		f.close()
 	#
 	r_vals = map(operator.itemgetter(ratio_col), ratios)
 	x_vals = map(operator.itemgetter(x_col), ratios)
@@ -161,18 +175,27 @@ def get_averaging_set(ratios=None, ave_lens=[5, 500], x_col=1, ratio_col=4):
 			lf  = linefit.linefit([these_x, these_r])
 			lf.doFit()
 			#
-			chi_sqrs[-1]+=[ [lf.meanVar(), lf.AIC, lf.totalVar, lf.Ndof] ]
+			chi_sqrs[-1]+=[ [lf.meanVar(), lf.AIC, lf.totalVar, lf.totalVar/these_r[-1], lf.Ndof] ]
 		print "fit(%d)" % (ave_len)
 		#
 		my_arrays = zip(*chi_sqrs[-1])
-		total_chi_sqrs += [ [ave_len, scipy.mean(my_arrays[0]), scipy.mean(my_arrays[1]), len(chi_sqrs[-1])] ]
+		total_chi_sqrs += [ [ave_len, scipy.mean(my_arrays[0]), scipy.mean(my_arrays[1]), scipy.mean(my_arrays[2]), len(chi_sqrs[-1])] ]
+		if fout!=None:
+			f=open(fout, 'a')
+			out_string = ''
+			for col in total_chi_sqrs[-1]:
+				out_string += '%s\t' % col
+			f.write('%s\n' % out_string[:-1])
+			f.close()
 		#
 	#
 	return [total_chi_sqrs, chi_sqrs]
 #
 def get_averaging_set2(ratios=None, ave_lens=[5, 100], x_col=1, ratio_col=4):
 	# get plot of fit quality as a function of ave-len
-	if ratios==None: return None
+	if ratios==None:
+		ratios = get_rbratios_tohoku()
+		# return None
 	#
 	if ave_lens[0]>ave_lens[1]: ave_lens.reverse()
 	#
@@ -207,35 +230,101 @@ def get_averaging_set2(ratios=None, ave_lens=[5, 100], x_col=1, ratio_col=4):
 			lf  = linefit.linefit([these_x, these_r])
 			lf.doFit()
 			#
-			chi_sqrs[-1]+=[ [lf.meanVar(), lf.AIC, lf.totalVar, lf.Ndof] ]
+			chi_sqrs[-1]+=[ [lf.meanVar(), lf.AIC, lf.totalVar, lf.totalVar/these_r[-1], lf.Ndof] ]
 		print "fit(%d)" % (ave_len)
 		#
 		my_arrays = zip(*chi_sqrs[-1])
-		total_chi_sqrs += [ [ave_len, scipy.mean(my_arrays[0]), scipy.mean(my_arrays[1]), len(chi_sqrs[-1])] ]
+		total_chi_sqrs += [ [ave_len, scipy.mean(my_arrays[0]), scipy.mean(my_arrays[1]), scipy.mean(my_arrays[2]), len(chi_sqrs[-1])] ]
 		#
 	#
 	return [total_chi_sqrs, chi_sqrs]
-
 #
-def plot_total_chi_sqrs(totals_list=None, ave_lens=[5,100], x_col=1, ratio_col=4, fignum=0):
+def plot_randomized_total_chi_sqrs(rbratios=None, ave_lens=[5, 100], x_col=0, ratio_col=4, fignum0=1, fout='ratio_fit_data/rand_ave_set.csv'):
+	#
+	if rbratios==None:
+		rbratios = get_rbratios_tohoku()
+	#
+	# now, randomize the ratio_col (we can either shuffle the existing values or just replace them with random numbers)
+	# let's shuffle...
+	x_temp = map(operator.itemgetter(ratio_col), rbratios)
+	random.shuffle(x_temp)
+	for i, x in enumerate(x_temp):
+		rbratios[i][ratio_col]=x
+	#
+	avset_rand = get_averaging_set(ratios=rbratios, ave_lens=[5, 500], x_col=x_col, ratio_col=ratio_col, fout=fout)
+	plot_return = plot_total_chi_sqrs(totals_list=avset_rand[0], ave_lens=ave_lens, x_col=x_col, ratio_col=ratio_col, fignum=fignum0, fout=None)
+	#
+	return avset_rand
+#
+def plot_total_chi_sqrs(totals_list=None, ave_lens=[5,100], x_col=1, ratio_col=4, fignum=0, fout=None):
 	#
 	# totals_list should come from the get_averaging_set[0]
+	# run this with defaults.
 	#
-	if totals_list == None: totals_list = get_averaging_set(ratios=None, ave_lens=ave_lens, x_col=x_col, ratio_col=ratio_col)
+	if totals_list == None: totals_list = get_averaging_set(ratios=None, ave_lens=ave_lens, x_col=x_col, ratio_col=ratio_col, fout=fout)[0]
 	#
 	my_arrays = zip(*totals_list)
+	sig_to_noise = [my_arrays[3][i]*math.sqrt(my_arrays[1][i]) for i in xrange(len(my_arrays[0]))]
 	#
 	plt.figure(fignum)
 	plt.clf()
-	plt.plot(my_arrays[0], my_arrays[1], '-', label='chi-squares')
-	plt.plot(my_arrays[0], my_arrays[2], '-', label='aic vals')
-	#
+	ax1=plt.gca()
+	
+	ax1.plot(my_arrays[0], my_arrays[2], '-', label='aic vals')
+	ax1.plot(my_arrays[0], my_arrays[3], '-', label='lacunarity')
+	ax1.plot(my_arrays[0], sig_to_noise, '-', label = 's/n')
 	plt.legend(loc=0, numpoints=1)
-	
+	#
+	ax2=ax1.twinx()
+	#
+	ax2.plot(my_arrays[0], my_arrays[1], '.-', label='chi-squares')
+	plt.legend(loc=0, numpoints=1)
+	#
+	return totals_list
 
-	
+def plot_total_chi_sqrs_files(f1='ratio_fit_data/tohoku_total_chi_sqrs.csv', f2='ratio_fit_data/rand_ave_tohoku.csv', fignum=0):
+	#
+	plt.figure(fignum)
+	plt.clf()
+	plot_func = plt.semilogy
+	#plot_func = plt.plot
+	#
+	cols = [0, 1, 2]
+	datas1 = []
+	if f1!=None:
+		fin = open(f1, 'r')
+		for rw in fin:
+			if rw[0]=='#': continue
+			rws = rw.split()
+			datas1 += [map(float, rws[0:3])]
+		fin.close()
+		#
+		zdatas = zip(*datas1)
+		plot_func(zdatas[0], zdatas[1], '-', label='f1')
+
+	if f2!=None:
+		datas2=[]
+		fin=open(f2)
+		for rw in fin:
+			if rw[0]=='#': continue
+			rws=rw.split()
+			datas2 += [map(float, rws[0:3])]
+		fin.close()
+		zdatas = zip(*datas2)
+		plot_func(zdatas[0], zdatas[1], '-', label='f2')
+	plt.legend(numpoints=1, loc=0)
+	#
+	if f2!=None and f1!=None:
+		delta_y = [abs(datas1[i][1]-datas2[i][1]) for i in range(len(datas1))]
+		fact_y  = [(datas2[i][1]/datas1[i][1]) for i in range(len(datas1))]
+		#
+		#plot_func(zdatas[0], delta_y, '--')
+		plot_func(zdatas[0], fact_y, '--')
+	#
 #
 def plot_ratio_fits(fit_dict, new_figs=False, fignum0=2):
+	#
+	# plot data from get_ratio_fits()
 	#
 	fnum=fignum0
 	plt.figure(fnum)
