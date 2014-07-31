@@ -931,6 +931,7 @@ def sumatraQuad(mc=5.0, targmag=9.1, rbavelen=None, bigmag=9.5, intlist=None, ca
 	#
 	c1=eqp.eqcatalog([])
 	c1.mt=mt
+	c1.mc=mc
 	c1.loadCatFromFile(catname)
 	c1.cat.sort(key = lambda x:x[0])
 	dlambda=1.76

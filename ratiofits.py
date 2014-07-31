@@ -25,12 +25,32 @@ nContours1=15
 tohoku_prams = {'mc':5.0, 'todt':mhp.dtm.datetime.now(mhp.pytz.timezone('UTC')), 'winlen':None, 'avlen':None, 'targmag':9.0, 'ndithers':10, 'nContours':nContours1, 'bigmag':7.0, 'lons':[135., 148.5], 'lats':[30., 45.25], 'refreshcat':True, 'dt0':mhp.dtm.datetime(1990,1,1, tzinfo=mhp.pytz.timezone('UTC')), 'catname':'cats/tohoku_rfits.cat', 'mt':7.6}
 
 def doTohoku():
-	A = get_rbratios_tohoku()
+	A = get_rbratios_tohoku()		# returns a rbratios() set like [[index, dtm, r>, r<, ratio, <ratio>]]
 	B = get_ratio_fits(ratios=A, Nfits=[22])
 	C = plot_ratio_fits(B, new_figs=False, fignum0=2)
 	#
 	return (A,B,C)
 
+def doSumatra():
+	# get a bunch of sumatra fits from rbTectoFigs. we'll want analysis on 0, 2, 3
+	sumatra_catalog = rfp.sumatraQuad()
+	#
+	interesting_quads = [0,2,3]
+	
+	#
+	mev = sumatra_catalog.getMainEvent(thiscat=sumatra_catalog.getcat(0))
+	interval_len = rfp.winlen(m=9.1, mc=sumatra_catalog.mc, mt=7.6, doInt=True)
+	#rbratios = sumatra_catalog.getNRBratios(intervals=None, winlen=1, delta_t=1, reverse=False, catnum=0)
+	rbratios = sumatra_catalog.plotIntervalRatiosAx(winlen=interval_len, cat=sumatra_catalog.getcat(1), hitThreshold=1.0, bigmag=9.0, thisAx=None, ratios=None, delta_t=1, avlen=max(1, int(interval_len/10)), mainEv=mev, logZ=None, rbLegLoc=0, reverse=False)
+	
+	rbratio_fits = get_ratio_fits(ratios=rbratios, Nfits=[rfp.winlen(m=9.1, mc=sumatra_catalog.mc, mt=7.6, doInt=True)])
+	
+	rbf_plot=None
+	#rbf_plot = plot_ratio_fits(rbratio_fits, new_figs=False, fignum0=11)
+	#
+	return (rbratios, rbratio_fits, rbf_plot)
+	#
+#	
 def get_rbratios_tohoku(mc=5.0, todt=mhp.dtm.datetime.now(mhp.pytz.timezone('UTC')), winlen=None, avlen=None, targmag=9.0, ndithers=10, nContours=nContours1, bigmag=7.0, lons=[135., 148.5], lats=[30., 45.25], refreshcat=True, dt0=mhp.dtm.datetime(1990,1,1, tzinfo=mhp.pytz.timezone('UTC')), catname='cats/tohoku_rfits.cat', mt=7.6):
 	#
 	# fetch and return a standard rb-ratio set.
