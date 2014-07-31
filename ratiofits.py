@@ -38,15 +38,17 @@ def doSumatra():
 	interesting_quads = [0,2,3]
 	
 	#
-	mev = sumatra_catalog.getMainEvent(thiscat=sumatra_catalog.getcat(0))
-	interval_len = rfp.winlen(m=9.1, mc=sumatra_catalog.mc, mt=7.6, doInt=True)
-	#rbratios = sumatra_catalog.getNRBratios(intervals=None, winlen=1, delta_t=1, reverse=False, catnum=0)
-	rbratios = sumatra_catalog.plotIntervalRatiosAx(winlen=interval_len, cat=sumatra_catalog.getcat(1), hitThreshold=1.0, bigmag=9.0, thisAx=None, ratios=None, delta_t=1, avlen=max(1, int(interval_len/10)), mainEv=mev, logZ=None, rbLegLoc=0, reverse=False)
-	
-	rbratio_fits = get_ratio_fits(ratios=rbratios, Nfits=[rfp.winlen(m=9.1, mc=sumatra_catalog.mc, mt=7.6, doInt=True)])
-	
-	rbf_plot=None
-	#rbf_plot = plot_ratio_fits(rbratio_fits, new_figs=False, fignum0=11)
+	this_cat_index=0
+	#
+	mev = sumatra_catalog.getMainEvent(thiscat=sumatra_catalog.getcat(this_cat_index))
+	interval_len = rfp.winlen(m=mev[3], mc=sumatra_catalog.mc, mt=7.6, doInt=True)
+	rbratios = sumatra_catalog.getNRBratios(intervals=None, winlen=1, delta_t=1, reverse=False, catnum=0)
+	rb_values = map(operator.itemgetter(4), rbratios)
+	mean_rbs = [mean(rb_values[max(i-interval_len, 0):i+1]) for i, x in enumerate(rb_values)]
+	for i,x in enumerate(mean_rbs): rbratios[i]+=[x]
+	#
+	fits = get_ratio_fits(ratios=mean_rbs, Nfits=[interval_len])
+	plotses = plot_ratio_fits(fits, new_figs=False, fignum0=11)
 	#
 	return (rbratios, rbratio_fits, rbf_plot)
 	#
