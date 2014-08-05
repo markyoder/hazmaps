@@ -277,12 +277,12 @@ def EMCTriple(targmag=7.2, mc=2.5, rfactor=.5, fignum=0, lats=[31.5, 33.0], lons
 		
 	return None
 
-def EMCQuads(targmag=7.2, mc=2.5, rfactor=.5):
+def EMCQuads(targmag=7.2, mc=2.5, rfactor=.5, lats=[31.5, 33.0], lons=[-116.15, -114.5], weighted_ratios=False):
 	# rfactor=.5, mc=3.0 looks great.
 	Nsequence = getNofm(targmag, mc)
 	emcEvent = [dtm.datetime(2010, 4, 4, 22, 40, 42, 360004, tzinfo=mhp.pytz.timezone('UTC')), 32.2862, -115.2953, 7.2, 10.0]
 	emcFS    = [dtm.datetime(2009, 12, 30, 18, 48, 57, 330004, tzinfo=mhp.pytz.timezone('UTC')), 32.464, -115.1892, 5.8, 6.0]	#"foreshock"?
-	a=mhp.elmayorhm(mc=mc, todt=mhp.dtm.datetime.now(mhp.pytz.timezone('UTC')), ndithers=10, nContours=nContours1, bigmag=6.0, refreshcat=True, dt0=mhp.dtm.datetime(1990,1,1, tzinfo=mhp.pytz.timezone('UTC')), lats=[31.5, 33.0], lons=[-116.15, -114.5])
+	a=mhp.elmayorhm(mc=mc, todt=mhp.dtm.datetime.now(mhp.pytz.timezone('UTC')), ndithers=10, nContours=nContours1, bigmag=6.0, refreshcat=True, dt0=mhp.dtm.datetime(1990,1,1, tzinfo=mhp.pytz.timezone('UTC')), lats=lats, lons=lons)
 	c1=a.getcat()
 	while len(c1.subcats)>0:c1.subcats.pop()
 	#targmag=6.96	# this is the estimated thickness of the seismogenic zone.
@@ -310,12 +310,13 @@ def EMCQuads(targmag=7.2, mc=2.5, rfactor=.5):
 	#i=5
 	plt.figure(9)
 	plt.clf()
-	c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=8.0, catnum=0, fignum=9, plotevents=False, intlist=[int(N0*.5), int(N0*.666), N0, int(N0*1.5)])
+	c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=8.0, catnum=0, fignum=9, plotevents=False, intlist=[int(N0*.5), int(N0*.666), N0, int(N0*1.5)], weighted=weighted_ratios)
+	plt.title('Full catalog (for reference)')
 	fnum=10
 	center =emcEvent[2], emcEvent[1]
 	#while i<=6:
 	for i in [-3,0,4]:
-		continue
+		#continue
 		thisCenter = [center[0]-i*dx, center[1]+i*dy]
 		c1.subcats+=[['circ%f' % i, circularcat(incat=c1.getcat(), latlon=[thisCenter[1], thisCenter[0]], Rkm=thisr*Lr)]]
 		print "Center %d: %f, %f" % (i, thisCenter[0], thisCenter[1])
@@ -328,7 +329,7 @@ def EMCQuads(targmag=7.2, mc=2.5, rfactor=.5):
 			i+=1.0
 			fnum+=1
 			continue
-		c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=8.0, catnum=len(c1.subcats), fignum=fnum, plotevents=False, intlist=[int(N0*.5), int(N0*.666), N0, int(N0*1.5)], thislw=2.25)
+		c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=8.0, catnum=len(c1.subcats), fignum=fnum, plotevents=False, intlist=[int(N0*.5), int(N0*.666), N0, int(N0*1.5)], thislw=2.25, weighted=weighted_ratios)
 		#
 		#
 		f=plt.figure(fnum)
@@ -417,7 +418,7 @@ def EMCQuads(targmag=7.2, mc=2.5, rfactor=.5):
 			fnum+=1
 			#continue
 		#N0=int(getNofm(m=targmag, mc=mc, mt=7.6, dmstar=1.0, dms=1.0))
-		c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=8.0, catnum=len(c1.subcats), fignum=fnum, plotevents=False, intlist=[int(N0*.5), int(N0*.666), N0, int(N0*1.5)], thislw=2.25, deltaLat=.5, deltaLon=.5)
+		c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=8.0, catnum=len(c1.subcats), fignum=fnum, plotevents=False, intlist=[int(N0*.5), int(N0*.666), N0, int(N0*1.5)], thislw=2.25, deltaLat=.5, deltaLon=.5, weighted=weighted_ratios)
 		#
 		#
 		f=plt.figure(fnum)
@@ -482,7 +483,7 @@ def EMCQuads(targmag=7.2, mc=2.5, rfactor=.5):
 		fnum+=1	
 	return c1
 
-def parkfieldQuads2(targmag=5.96, mc=1.5, rfactor=.5):
+def parkfieldQuads2(targmag=5.96, mc=1.5, rfactor=.5, weighted_ratios=False):
 	# array of elliptical Parkfield RBTS. (production plot comes from here).
 	Nsequence = getNofm(targmag, mc)
 	intervalList = [int(Nsequence*.5), int(Nsequence*.666), Nsequence, int(Nsequence*1.5)]
@@ -511,7 +512,7 @@ def parkfieldQuads2(targmag=5.96, mc=1.5, rfactor=.5):
 		print "fnum: %d, center: %f, %f" % (fnum, thisCenter[1], thisCenter[0])
 		c1.addEllipCat('ellip%f' % i, c1.cat, thetadeg, thisCenter[1], thisCenter[0], .4, .15)
 		f=plt.figure(fnum)
-		c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=6.0, catnum=len(c1.subcats), fignum=fnum, plotevents=False, intlist=intervalList, thislw=2.25, deltaLat=.25, deltaLon=.25)
+		c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=6.0, catnum=len(c1.subcats), fignum=fnum, plotevents=False, intlist=intervalList, thislw=2.25, deltaLat=.25, deltaLon=.25, weighted=weighted_ratios)
 		mywinlen = winlen(targmag, mc, mt=7.6, doInt=False)
 		if mywinlen>(len(c1.getcat(len(c1.subcats)))*1.1): 
 			i+=1.0
@@ -580,7 +581,7 @@ def parkfieldQuads2(targmag=5.96, mc=1.5, rfactor=.5):
 		fnum+=1
 	return c1
 
-def parkfieldQuadsCircular(targmag=5.96, mc=1.5, rfactor=.5):
+def parkfieldQuadsCircular(targmag=5.96, mc=1.5, rfactor=.5, weighted_ratios=False):
 	Nsequence = getNofm(targmag, mc)
 	intervalList = [int(Nsequence*.5), int(Nsequence*.666), Nsequence, int(Nsequence*1.5)]
 	pfEvent = [dtm.datetime(2004, 9, 28, 22, 40, 0, 0, tzinfo=mhp.pytz.timezone('UTC')), 35.8182,  -120.366,  5.97,  8.58]
@@ -623,7 +624,7 @@ def parkfieldQuadsCircular(targmag=5.96, mc=1.5, rfactor=.5):
 		print "center: ", thisCenter
 		c1.subcats+=[['circ%f' % i, circularcat(incat=c1.getcat(0), latlon=[thisCenter[1], thisCenter[0]], Rkm=thisr*Lr)]]
 		f=plt.figure(fnum)
-		c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=6.0, catnum=len(c1.subcats), fignum=fnum, plotevents=False, intlist=intervalList, thislw=2.25, deltaLat=.25, deltaLon=.25)
+		c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=6.0, catnum=len(c1.subcats), fignum=fnum, plotevents=False, intlist=intervalList, thislw=2.25, deltaLat=.25, deltaLon=.25, weighted=weighted_ratios)
 		mywinlen = winlen(targmag, mc, mt=7.6, doInt=False)
 		if mywinlen>(len(c1.getcat(len(c1.subcats)))*1.1): 
 			i+=1.0
@@ -695,7 +696,9 @@ def parkfieldQuadsCircular(targmag=5.96, mc=1.5, rfactor=.5):
 		fnum+=1
 	return c1
 
-def parkfieldQuads(targmag=5.96, mc=1.5):
+def parkfieldQuads(targmag=5.96, mc=1.5, weighted_ratios=False):
+	# testing differenc circle radii. this approach was not used much since it did not produce any (apparently) significant results.
+	#
 	Nsequence = getNofm(targmag, mc)
 	pfEvent = [dtm.datetime(2004, 9, 28, 17, 15, 24, 249999, tzinfo=mhp.pytz.timezone('UTC')), 35.8182,  -120.366,  5.97,  8.58]
 	a=mhp.parkfieldhm(mc=mc, todt=mhp.dtm.datetime.now(mhp.pytz.timezone('UTC')), ndithers=10, nContours=nContours1, bigmag=5.0, refreshcat=True, dt0=mhp.dtm.datetime(1990,1,1, tzinfo=mhp.pytz.timezone('UTC')))
@@ -711,7 +714,7 @@ def parkfieldQuads(targmag=5.96, mc=1.5):
 		c1.subcats+=[['circ%f' % thisr, circularcat(incat=c1.getcat(), latlon=[pfEvent[1], pfEvent[2]], Rkm=thisr*Lr)]]
 		#
 		fnum=myIndex+9
-		c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=5.0, catnum=myIndex, fignum=fnum, plotevents=False, intlist=[250, 500, 770, 1000], thislw=2.25)
+		c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=5.0, catnum=myIndex, fignum=fnum, plotevents=False, intlist=[250, 500, 770, 1000], thislw=2.25, weighted=weighted_ratios)
 		#
 		f=plt.figure(fnum)
 		thisAxes = f.get_axes()
@@ -738,7 +741,7 @@ def parkfieldQuads(targmag=5.96, mc=1.5):
 		myIndex+=1
 	return c1
 
-def chilequads(targmag=8.8, mc=5.0):
+def chilequads(targmag=8.8, mc=5.0, weighted_ratios=False):
 	Nsequence = getNofm(targmag, mc)
 	a=mhp.chilehm(mc=mc, todt=mhp.dtm.datetime.now(mhp.pytz.timezone('UTC')), ndithers=10, nContours=nContours1, bigmag=7.0, lons=[135., 148.5], lats=[30., 45.25], refreshcat=True, dt0=mhp.dtm.datetime(1990,1,1, tzinfo=mhp.pytz.timezone('UTC')))
 	c1=a.getcat()
@@ -760,7 +763,7 @@ def chilequads(targmag=8.8, mc=5.0):
 		c1.subcats[k][1].sort(key=lambda x: x[0])
 	# ... and finish eventually...
 
-def chichiquads(targmag=7.3, mc=2.5, lfactor=.6, catname='cats/taiwan1994.cat'):
+def chichiquads(targmag=7.3, mc=2.5, lfactor=.6, catname='cats/taiwan1994.cat', weighted_ratios=False):
 	# 7.1, or ANSS at 7.3, 7.6? maybe it's up to us to find the "correct" magnitude?
 	# m=7.3 and lfactor=.6 produce a really nice plot. The corresponding m(L)=7.46 does not appear to produce
 	# anything useful.
@@ -799,7 +802,7 @@ def chichiquads(targmag=7.3, mc=2.5, lfactor=.6, catname='cats/taiwan1994.cat'):
 	'''
 	#
 	# and aftershock CM:
-	c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=9.5, catnum=2, fignum=2, plotevents=False, intlist=None, mapLLlat=22.5, mapLLlon=119.75, mapURlat=25.0, mapURlon=122.25, thislw=2.25)
+	c1.rbomoriQuadPlot(mc=mc, targmag=targmag, bigmag=9.5, catnum=2, fignum=2, plotevents=False, intlist=None, mapLLlat=22.5, mapLLlon=119.75, mapURlat=25.0, mapURlon=122.25, thislw=2.25, weighted=weighted_ratios)
 	thisAxes = plt.figure(2).get_axes()
 	ax=thisAxes[3]
 	# plot relevant catalog and "dressing":
@@ -871,7 +874,12 @@ def chichiquads(targmag=7.3, mc=2.5, lfactor=.6, catname='cats/taiwan1994.cat'):
 	#myax.set_ylim(auto=True)
 	winlen = mhp.getNsample(m=targmag, mc=mc)
 	rbavelen=max(1, int(winlen/10.))
-	r2=c1.plotIntervalRatiosAx(winlen=winlen, cat=c1.getcat(2), hitThreshold=1.0, bigmag=9.0, thisAx=myax, ratios=None, delta_t=1, avlen=rbavelen, mainEv=chichi, logZ=None, rbLegLoc=0, reverse=False)
+	#
+	if weighted_ratios==False:
+		r2=c1.plotIntervalRatiosAx(winlen=winlen, cat=c1.getcat(2), hitThreshold=1.0, bigmag=9.0, thisAx=myax, ratios=None, delta_t=1, avlen=rbavelen, mainEv=chichi, logZ=None, rbLegLoc=0, reverse=False)
+	if weighted_ratios==True:
+		r2=c1.plotWeightedIntervalRatiosAx(winlen=winlen, cat=c1.getcat(2), hitThreshold=1.0, bigmag=9.0, thisAx=myax, ratios=None, delta_t=1, avlen=rbavelen, mainEv=chichi, logZ=None, rbLegLoc=0, reverse=False)
+	#
 	myax.plot([chichi[0]], [1.15], 'md', ms=7, alpha=.8, zorder=11)
 	myax.plot([chichi[0]], [1.15], 'kd', ms=9, alpha=.7, zorder=10)
 	#
@@ -907,7 +915,7 @@ def chichiquads(targmag=7.3, mc=2.5, lfactor=.6, catname='cats/taiwan1994.cat'):
 	#return thisAxes[2]
 
 # PAGEOPH-rbints
-def sumatraQuad(mc=5.0, targmag=9.1, rbavelen=None, bigmag=9.5, intlist=None, catname='cats/sumatra.cat', refreshcat=False, plotevents=False, mt=7.55, lons=[92.0, 106.0],lats=[-9.0, 10.0], lfactor=.5):
+def sumatraQuad(mc=5.0, targmag=9.1, rbavelen=None, bigmag=9.5, intlist=None, catname='cats/sumatra.cat', refreshcat=False, plotevents=False, mt=7.55, lons=[92.0, 106.0],lats=[-9.0, 10.0], lfactor=.5, weighted_ratios=False):
 	#
 	# mc=4.75 might be ok, but i think we get better results for 5.0
 	#
@@ -967,7 +975,7 @@ def sumatraQuad(mc=5.0, targmag=9.1, rbavelen=None, bigmag=9.5, intlist=None, ca
 	winlen=int(mhp.getNsample(m=targmag, mc=mc, mt=mt, doint=True))
 	#print "rbts for winlen=%d" % winlen
 	#
-	arb=c1.rbomoriQuadPlot(mc=mc, winlen=winlen, rbavelen=avlen, bigmag=bigmag, intlist=intlist, catnum=0, fignum=0, plotevents=plotevents, logZ=None, thislw=2.25)
+	arb=c1.rbomoriQuadPlot(mc=mc, winlen=winlen, rbavelen=avlen, bigmag=bigmag, intlist=intlist, catnum=0, fignum=0, plotevents=plotevents, logZ=None, thislw=2.25, weighted=weighted_ratios)
 	Xcat=map(operator.itemgetter(2), c1.getcat(0))
 	Ycat=map(operator.itemgetter(1), c1.getcat(0))
 	Xcat, Ycat = c1.catmap(Xcat, Ycat)
@@ -989,7 +997,7 @@ def sumatraQuad(mc=5.0, targmag=9.1, rbavelen=None, bigmag=9.5, intlist=None, ca
 		#arb=c1.rbomoriQuadPlot(mc=mc, winlen=winlen, rbavelen=avlen, bigmag=bigmag, intlist=intlist, catnum=thiscatnum, fignum=thisfignum, plotevents=plotevents, logZ=None, thislw=2.25)
 		#
 		#arb=c1.rbomoriQuadPlot(mc=mc, targmag=targmag, rbavelen=None, bigmag=bigmag, intlist=intlist, catnum=thiscatnum, fignum=thisfignum, plotevents=plotevents, logZ=None, thislw=2.25)
-		arb=c1.rbomoriQuadPlot(mc=mc, targmag=thismag, rbavelen=None, bigmag=bigmag, intlist=intlist, catnum=thiscatnum, fignum=thisfignum, plotevents=plotevents, logZ=None, thislw=2.25, deltaLat=1.5, deltaLon=1.5)
+		arb=c1.rbomoriQuadPlot(mc=mc, targmag=thismag, rbavelen=None, bigmag=bigmag, intlist=intlist, catnum=thiscatnum, fignum=thisfignum, plotevents=plotevents, logZ=None, thislw=2.25, deltaLat=1.5, deltaLon=1.5, weighted=weighted_ratios)
 		if arb==None: continue
 		plt.figure(thisfignum)
 		thisAxes = plt.figure(thisfignum).get_axes()
@@ -1047,7 +1055,12 @@ def sumatraQuad(mc=5.0, targmag=9.1, rbavelen=None, bigmag=9.5, intlist=None, ca
 	ax = thisax[4]
 	winlen = mhp.getNsample(m=foreshocks[2][3], mc=mc)
 	rbavelen=max(1, int(winlen/10.))
-	r2=c1.plotIntervalRatiosAx(winlen=winlen, cat=c1.getcat(2), hitThreshold=1.0, bigmag=9.0, thisAx=ax, ratios=None, delta_t=1, avlen=rbavelen, mainEv=foreshocks[2], logZ=None, rbLegLoc=0, reverse=False)
+	#
+	if weighted_ratios==False:
+		r2=c1.plotIntervalRatiosAx(winlen=winlen, cat=c1.getcat(2), hitThreshold=1.0, bigmag=9.0, thisAx=ax, ratios=None, delta_t=1, avlen=rbavelen, mainEv=foreshocks[2], logZ=None, rbLegLoc=0, reverse=False)
+	if weighted_ratios==True:
+		r2=c1.plotWeightedIntervalRatiosAx(winlen=winlen, cat=c1.getcat(2), hitThreshold=1.0, bigmag=9.0, thisAx=ax, ratios=None, delta_t=1, avlen=rbavelen, mainEv=foreshocks[2], logZ=None, rbLegLoc=0, reverse=False)
+	#
 	ax.plot([foreshocks[2][0]], [1.15], 'md', ms=7, alpha=.8, zorder=11)
 	ax.plot([foreshocks[2][0]], [1.15], 'kd', ms=9, alpha=.7, zorder=10)
 	#
@@ -1184,7 +1197,7 @@ def plotEvents(c1=None, m=None, mc=None, ax=None, startdt=None):
 	
 
 
-def tohokuQuads(targmag=9.0, mc=5.0):
+def tohokuQuads(targmag=9.0, mc=5.0, weighted_ratios=False):
 	# mc=4.75 might be more desirable... we might even get away with 4.25 though... i think the mc is not consistent in the regions, so smaller mc gives lots of noise (moreso on th maps than the rbts).
 	# ... and anyway, it looks like the m<4.5 events are totally FUBAR, at least spatially. they seem to produce decent RBTS, but really 
 	# crappy hazmaps. there may be an error that mis-locates the smaller earthquakes, so we end up with the right number and maybe even 
@@ -1218,7 +1231,7 @@ def tohokuQuads(targmag=9.0, mc=5.0):
 	tohokuLatLon = tohokuEvent[1], tohokuEvent[2]
 	Lr = 10.0**(.5*targmag - 1.76)
 	print "Lr = %f" % Lr
-	rfactors = [.25, .25, .5, .6, .75, 1.0, 1.5, 2.0]
+	#rfactors = [.25, .25, .5, .6, .75, 1.0, 1.5, 2.0]
 	rfactors = [.5]
 	drawCircles=[]
 	for thisr in rfactors:
@@ -1244,7 +1257,7 @@ def tohokuQuads(targmag=9.0, mc=5.0):
 	for i in xrange(len(c1.subcats)+1):
 		thistargmag=targmag
 		if i==2: thistargmag=8.4
-		c1.rbomoriQuadPlot(mc=mc, targmag=thistargmag, bigmag=9.5, catnum=i, fignum=fnum0+i, plotevents=False, intlist=intlist, thislw=2.25, deltaLat=1.5, deltaLon=1.5)
+		c1.rbomoriQuadPlot(mc=mc, targmag=thistargmag, bigmag=9.5, catnum=i, fignum=fnum0+i, plotevents=False, intlist=intlist, thislw=2.25, deltaLat=1.5, deltaLon=1.5, weighted=weighted_ratios)
 		#
 		# draw the catalog boundaries:
 		llrange = c1.getLatLonRange(c1.getcat(i))

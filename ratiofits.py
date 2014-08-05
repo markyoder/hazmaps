@@ -24,6 +24,8 @@ nContours1=15
 
 tohoku_prams = {'mc':5.0, 'todt':mhp.dtm.datetime.now(mhp.pytz.timezone('UTC')), 'winlen':None, 'avlen':None, 'targmag':9.0, 'ndithers':10, 'nContours':nContours1, 'bigmag':7.0, 'lons':[135., 148.5], 'lats':[30., 45.25], 'refreshcat':True, 'dt0':mhp.dtm.datetime(1990,1,1, tzinfo=mhp.pytz.timezone('UTC')), 'catname':'cats/tohoku_rfits.cat', 'mt':7.6}
 
+sumatra_prams = {'mc':5.0, 'targmag':9.1, 'rbavelen':None, 'bigmag':9.5, 'intlist':None, 'catname':'cats/sumatra.cat', 'refreshcat':False, 'plotevents':False, 'mt':7.55, 'lons':[92.0, 106.0], 'lats':[-9.0, 10.0], 'lfactor':.5}
+
 def doTohoku():
 	A = get_rbratios_tohoku()		# returns a rbratios() set like [[index, dtm, r>, r<, ratio, <ratio>]]
 	B = get_ratio_fits(ratios=A, Nfits=[22])
@@ -31,26 +33,93 @@ def doTohoku():
 	#
 	return (A,B,C)
 
-def doSumatra():
+def doSumatra(mc=5.0, targmag=9.1, rbavelen=None, bigmag=9.5, intlist=None, catname='cats/sumatra.cat', refreshcat=False, plotevents=False, mt=7.55, lons=[92.0, 106.0],lats=[-9.0, 10.0], lfactor=.5):
 	# get a bunch of sumatra fits from rbTectoFigs. we'll want analysis on 0, 2, 3
-	sumatra_catalog = rfp.sumatraQuad()
-	#
-	interesting_quads = [0,2,3]
+	#sumatra_catalog = rfp.sumatraQuad()
 	
+	cl1=atp.catfromANSS(lon=lons,lat=lats, minMag=mc, dates0=[dtm.datetime(1990,1,1, tzinfo=pytz.timezone('UTC')), dtm.datetime.now(pytz.timezone('UTC'))], fout=None)
+	catalogs=[]
 	#
-	this_cat_index=0
+	c1=eqp.eqcatalog(cl1)
+	c1.mc=mc
+	c1.mt=mt
+	c1.targmag = targmag
 	#
-	mev = sumatra_catalog.getMainEvent(thiscat=sumatra_catalog.getcat(this_cat_index))
-	interval_len = rfp.winlen(m=mev[3], mc=sumatra_catalog.mc, mt=7.6, doInt=True)
-	rbratios = sumatra_catalog.getNRBratios(intervals=None, winlen=1, delta_t=1, reverse=False, catnum=0)
-	rb_values = map(operator.itemgetter(4), rbratios)
-	mean_rbs = [mean(rb_values[max(i-interval_len, 0):i+1]) for i, x in enumerate(rb_values)]
-	for i,x in enumerate(mean_rbs): rbratios[i]+=[x]
+	c1.cat.sort(key = lambda x:x[0])
+	dlambda=1.76
+	Lr=10.0**(targmag/2.0 - dlambda)
+	latlonMS=[3.316, 95.854]	#mainshock
+	#mainshock = [dtm.datetime(2004, 12, 26, 0, 58, 53, 449995, tzinfo=pytz.timezone('UTC')),  3.295,  95.982,  9.0,  30.0]
+	mainshock=c1.getMainEvent()
+	mainshock[3]=9.1		#ANSS seems to be listing sumatra as 9.0 lately.
+	mevIndex = mainshock[-1]
 	#
-	fits = get_ratio_fits(ratios=mean_rbs, Nfits=[interval_len])
-	plotses = plot_ratio_fits(fits, new_figs=False, fignum0=11)
+	foreshocks = []
+	foreshocks+=[mainshock[:]]
+	foreshocks+=[mainshock[:]]
+	#foreshocks+=[[dtm.datetime(2000, 6, 4, 16, 28, 26, 170001, tzinfo=pytz.timezone('UTC')), -4.721, 102.087, 7.9, 33.0]]
+	#foreshocks+=[[dtm.datetime(2001, 2, 13, 19, 28, 30, 260001, tzinfo=pytz.timezone('UTC')), -4.68, 102.562, 7.4, 36.0]]
+	#foreshocks+=[[dtm.datetime(2002, 11, 2, 1, 26, 10, 699996, tzinfo=pytz.timezone('UTC')), 2.824, 96.085, 7.4, 30.0]]
 	#
-	return (rbratios, rbratio_fits, rbf_plot)
+	# adjust mainshock:
+	foreshocks[0][1]+=0.
+	foreshocks[0][2]-=0.
+	#
+	for i in xrange(mevIndex+1,len(c1.getcat(0))):
+		if c1.getcat(0)[i][3]>=8.0:
+			foreshocks+=[c1.getcat(0)[i]]
+			print "large aftershock: ", c1.getcat(0)[i]
+		
+	#
+	interesting_quads = [0,2,3]		# we know these are interesting...
+	interesting_quads = range(len(foreshocks))
+	for i in interesting_quads:
+		#thiscatnum=i
+		#thisfignum=i
+		thismag=foreshocks[i][3]
+		thisLr = 10.0**(thismag/2.0 - dlambda)
+		#
+		#if i>0:
+		fsLatLon=[foreshocks[i][1], foreshocks[i][2]]
+		#if i>0: c1.subcats+=[['r%d' %i, circularcat(c1.getcat(0), latlon=fsLatLon, Rkm=Lr*lfactor)]]
+		catalogs+=[eqp.eqcatalog(rfp.circularcat(c1.getcat(0), latlon=fsLatLon, Rkm=Lr*lfactor))]
+		catalogs[-1].mainshock = catalogs[-1].getMainEvent()
+	#
+	# some stuff we know:
+	catalogs[0].mainshock[3] = targmag		# or 9.1... but anss sometimes reports this differently in think.
+	#
+	#
+	fignum0=11
+	current_fig = plt.figure(fignum0)
+	#
+	for i_catalog, catalog in enumerate(catalogs):
+		#
+		#mev = catalog.getMainEvent()
+		mev = catalog.mainshock		# which we've added in this script. otherwise, use catalog.getMainEvent()
+		print "mev: ", mev
+		interval_len = rfp.winlen(m=mev[3], mc=mc, mt=mt, doInt=True)
+		avlen = max(1,int(interval_len/10))
+		#
+		current_fig = plt.figure()
+		plt.clf()
+		catalog.rbomoriQuadPlot(targmag=mev[3], mc=mc, weighted=False, fignum=current_fig.number)
+		#
+		current_fig = plt.figure()
+		plt.clf()
+		catalog.rbomoriQuadPlot(targmag=mev[3], mc=mc, weighted=True, fignum=current_fig.number)
+		#rbratios = catalog.getNRBratios(intervals=None, winlen=interval_len, delta_t=1, reverse=False)
+		#rb_values = map(operator.itemgetter(4), rbratios)
+		#mean_rbs = [numpy.mean(rb_values[max(i-interval_len, 0):i+1]) for i, x in enumerate(rb_values)]
+		#for i,x in enumerate(mean_rbs): rbratios[i]+=[x]
+		#
+		#return rbratios
+		#
+		#fits = get_ratio_fits(ratios=rbratios, Nfits=[interval_len])
+		#plotses = plot_ratio_fits(fits, new_figs=False, fignum0=fignum0)
+		#fignum0+=4
+	#
+	#return (rbratios, rbratio_fits, rbf_plot)
+	return None
 	#
 #	
 def get_rbratios_tohoku(mc=5.0, todt=mhp.dtm.datetime.now(mhp.pytz.timezone('UTC')), winlen=None, avlen=None, targmag=9.0, ndithers=10, nContours=nContours1, bigmag=7.0, lons=[135., 148.5], lats=[30., 45.25], refreshcat=True, dt0=mhp.dtm.datetime(1990,1,1, tzinfo=mhp.pytz.timezone('UTC')), catname='cats/tohoku_rfits.cat', mt=7.6):
@@ -419,8 +488,8 @@ def plot_ratio_fits(fit_dict, new_figs=False, fignum0=2):
 		plt.title('mean lacunarity')
 		#y_lac = numpy.array(y_r[-len(y_chi):])/numpy.array(y_chi)
 		y_lac = [math.log10(y_r[-len(y_chi):][i])/ychi for i, ychi in enumerate(y_chi)]
-		plt.plot(X[-len(y_chi):], y_lac, '-', lw=2, label='r/chi')
-		plt.plot([X[-len(y_chi)], X[-1]], [0., 0.], 'k-', lw=2, zorder=1)
+		plt.semilogy(X[-len(y_chi):], y_lac, '-', lw=2, label='r/chi')
+		plt.semilogy([X[-len(y_chi)], X[-1]], [1., 1.], 'k-', lw=2, zorder=1)
 		plt.legend(loc=0)
 		#
 		#
