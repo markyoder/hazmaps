@@ -29,11 +29,12 @@ import operator
 import urllib
 #import MySQLdb
 
-import yodapy as yp 
+#import yodapy as yp 
 #import rbIntervals as rbi
 import hazmap as hmp
 import BASScast as bcp
 import eqcatalog as eqp
+import ANSStools as atp
 
 #
 # some notes:
@@ -62,7 +63,7 @@ def makeHazMapDith(catname='cats/japancat4b.cat', catnum=0, mc=4.5, gridsize=Non
 		if avlen==0: avlen=1
 
 	# generic ditherd haz-map maker. then, mazMapTo(your-favorite-date-of-catastrophe).
-	catalog=yp.eqcatalog()
+	catalog=eqp.eqcatalog()
 	catalog.loadCatFromFile(catname)
 	#
 	return makeHazMapDith2(catalog, catnum, mc, gridsize, ndithers, winlen, sigma, avlen, bigmag, fignum, logZ)
@@ -115,9 +116,9 @@ def chichiStandardHM(catname='cats/chichistandard.cat', catnum=0, mc=3.0, gridsi
 def makeChiChimap(catname='cats/taiwan1994.cat', catnum=0, mc=2.5, gridsize=None, ndithers=3, winlen=32, sigma=1.68, avlen=1, bigmag=6.0, fignum=0):
 	#
 	
-	taiwancat=yp.eqcatalog()
+	taiwancat=eqp.eqcatalog()
 	taiwancat.loadCatFromFile('cats/taiwan.cat')
-	mytcat=yp.eqcatalog(taiwancat.getTimeRangeCat(taiwancat.getcat(0), dtm.datetime(1985,1,1, 0, 0, 0, 0, pytz.timezone('UTC')), dtm.datetime(2002,1,1, 0, 0, 0, 0, pytz.timezone('UTC'))))
+	mytcat=eqp.eqcatalog(taiwancat.getTimeRangeCat(taiwancat.getcat(0), dtm.datetime(1985,1,1, 0, 0, 0, 0, pytz.timezone('UTC')), dtm.datetime(2002,1,1, 0, 0, 0, 0, pytz.timezone('UTC'))))
 	#
 	chichidate = dtm.datetime( 1999, 9, 20, 17, 47, 15, 850000, tzinfo=pytz.timezone('UTC'))
 	chichi = [chichidate, 23.8525, 120.8155, 7.3, 8.0]
@@ -194,10 +195,10 @@ def makeparkfieldmap(catname='cats/parkfield.cat', catnum=0, mc=1.5, gridsize=No
 	noisethresh2=abs(math.log10(noisethresh2))
 	print "noise thresholds: %f, %f" % (noisethresh, noisethresh2)
 	#
-	# pfc=yp.eqcatalog()
+	# pfc=eqp.eqcatalog()
 	# pfc.loadCatFromFile('cats/parkfield.cat')
 	#
-	# pfcEl=yp.eqcatalog(pfc.ellipseCat(None, -40., 35.9, -120.5, .15, .4))
+	# pfcEl=eqp.eqcatalog(pfc.ellipseCat(None, -40., 35.9, -120.5, .15, .4))
 	#
 	# plot an ellipse around the ellipse catalog:
 	# el=Ellipse([-120.5, 35.9], .8, .3, -40., facecolor='b', alpha=.25)
@@ -205,10 +206,10 @@ def makeparkfieldmap(catname='cats/parkfield.cat', catnum=0, mc=1.5, gridsize=No
 	# mhp.plt.fill(Xel, Yel, ec='r', fc='c', alpha=.25)
 	#
 	# but for the haz-map, we don't need to worry about that (though we might want to hilight the aftershock zone in a plot)
-	pfc0=yp.eqcatalog()
+	pfc0=eqp.eqcatalog()
 	#pfc0.loadCatFromFile('cats/parkfield.cat')
 	pfc0.loadCatFromFile(catname)
-	pfc=yp.eqcatalog(pfc0.getLatLonSubcat(pfc0.getcat(0), lats=[35.65, 36.3], lons=[-121.0, -120.]))
+	pfc=eqp.eqcatalog(pfc0.getLatLonSubcat(pfc0.getcat(0), lats=[35.65, 36.3], lons=[-121.0, -120.]))
 	#
 	#objHM=makeHazMapDith(catname, catnum, mc, gridsize, ndithers, winlen, sigma, avlen, bigmag, fignum)
 	objHM=makeHazMapDith2(pfc, catnum, mc, gridsize, ndithers, winlen, sigma, avlen, bigmag, fignum)
@@ -302,7 +303,7 @@ def makeBigBearMap(catname='cats/hmine.cat', catnum=0, mc=2.5, gridsize=None, nd
 	
 def getHMinecat():
 	# def catfromANSS(lon=[135., 150.], lat=[30., 41.5], minMag=4.0, dates0=[dtm.date(2005,01,01), None], Nmax=999999, fout='cats/mycat.cat'):
-	yp.catfromANSS(lon=[-117.25, -115.5], lat=[33.5, 35.5], minMag=1.5, dates0=[dtm.datetime(1975,1,1, tzinfo=pytz.timezone('UTC')), None], fout='cats/hmine.cat')
+	atp.catfromANSS(lon=[-117.25, -115.5], lat=[33.5, 35.5], minMag=1.5, dates0=[dtm.datetime(1975,1,1, tzinfo=pytz.timezone('UTC')), None], fout='cats/hmine.cat')
 	return None
 
 def makeLandersMap(catname='cats/hmine.cat', catnum=0, mc=2.5, gridsize=None, ndithers=3, winlen=20, sigma=1.68, avlen=2, bigmag=6.0, fignum=0, dateto=dtm.datetime(1992, 6, 25, tzinfo=pytz.timezone('UTC'))):
@@ -884,7 +885,7 @@ def makeJapCat(lon=[135., 146.], lat=[30., 41.5], minMag=4.5, dates0=[dtm.dateti
 		dates0[1]=nowdtm
 	#	
 	'''
-	catlist=yp.getANSSlist(lon, lat, minMag, dates0, Nmax, None)
+	catlist=eqp.getANSSlist(lon, lat, minMag, dates0, Nmax, None)
 	f=open(fout, 'w')
 	f.write("#anss catalog\n")
 	f.write("#lon=%s\tlat=%s\tm0=%f\tdates=%s\n" % (str(lon), str(lat), minMag, str(dates0)))
@@ -892,18 +893,18 @@ def makeJapCat(lon=[135., 146.], lat=[30., 41.5], minMag=4.5, dates0=[dtm.dateti
 		f.write('%s\t%s\t%s\t%s\n' % (rw[0], rw[1], rw[2], rw[4]))
 	f.close()
 	'''
-	catlist=yp.catfromANSS(lon, lat, minMag, dates0, Nmax, fout)
+	catlist=atp.catfromANSS(lon, lat, minMag, dates0, Nmax, fout)
 
 def makeMexicat(lats=[31.5, 33.0], lons=[-116., -114.75], mc=2.5, dts=[dtm.datetime(1990,1,1, 0, 0, 0, 0, pytz.timezone('UTC')), None], fout='cats/mexicat0.cat'):
 	# catfromANSS(lon=[135., 150.], lat=[30., 41.5], minMag=4.0, dates0=[dtm.date(2005,01,01), None], Nmax=999999, fout='cats/mycat.cat')
-	return yp.catfromANSS(lat=lats, lon=lons, minMag=mc, dates0=dts, fout=fout)
+	return atp.catfromANSS(lat=lats, lon=lons, minMag=mc, dates0=dts, fout=fout)
 
 def makeSocalcat(lat=[31., 37.], lon=[-119., -114.], minMag=2.25, dates0=[dtm.datetime(1990,1,1, 0, 0, 0, 0, pytz.timezone('UTC')), dtm.datetime.now(pytz.timezone('UTC'))], fout='cats/socal.cat'):
-	a=yp.catfromANSS(lat=lat, lon=lon, minMag=minMag, dates0=dates0, fout=fout)
+	a=atp.catfromANSS(lat=lat, lon=lon, minMag=minMag, dates0=dates0, fout=fout)
 	return a
 
 def makelaquilacat(lat=[40., 45.], lon=[11.,18.], mc=1.5, dts=[dtm.datetime(2000,1,1, 0, 0, 0, 0, pytz.timezone('UTC')), None], fout='cats/laquila.cat'):
-	a=yp.catfromANSS(lat=lat, lon=lon, minMag=mc, dates0=dts, fout=fout)
+	a=atp.catfromANSS(lat=lat, lon=lon, minMag=mc, dates0=dts, fout=fout)
 	return a
 
 
@@ -1034,8 +1035,8 @@ def checklognorms():
 	for rw in r1:
 		dts+=[mpd.date2num(rw[1])]
 	#
-	r1ave=yp.logaverageOver(map(mhp.operator.itemgetter(2), r1), 40)
-	r2ave=yp.logaverageOver(map(mhp.operator.itemgetter(2), r2), 40)
+	r1ave=eqp.logaverageOver(map(mhp.operator.itemgetter(2), r1), 40)
+	r2ave=eqp.logaverageOver(map(mhp.operator.itemgetter(2), r2), 40)
 	
 	plt.figure(7)
 	plt.ion()
@@ -1052,14 +1053,14 @@ def pfquad(mc=1.5, targmag=6.0, rbavelen=None, bigmag=5.0, intlist=[25, 50, 100,
 		refreshcat=True
 		catname='cats/parkfield.cat'
 	if refreshcat==True:
-		#cl1=yp.catfromANSS(lon=[85.0, 105.0],lat=[-10.0, 10.0], minMag=3.5, dates0=[yp.dtm.date(2000,1,1), yp.dtm.date(2012,4,14)], fout='cats/indonesia201204.cat')
-		#cl1=yp.catfromANSS(lon=[85.0, 105.0],lat=[-10.0, 10.0], minMag=3.5, dates0=[yp.dtm.date(1990,1,1), yp.dtm.date(2012,4,14)], fout=catname)
+		#cl1=atp.catfromANSS(lon=[85.0, 105.0],lat=[-10.0, 10.0], minMag=3.5, dates0=[eqp.dtm.date(2000,1,1), eqp.dtm.date(2012,4,14)], fout='cats/indonesia201204.cat')
+		#cl1=atp.catfromANSS(lon=[85.0, 105.0],lat=[-10.0, 10.0], minMag=3.5, dates0=[eqp.dtm.date(1990,1,1), eqp.dtm.date(2012,4,14)], fout=catname)
 		dLat=.6
 		dLon=.6
-		#cl1=yp.catfromANSS(lon=[-120.5-dLon, 35.9-dLat],lat=[-120.5+dLon, 35.9+dLat], minMag=mc, dates0=[yp.dtm.datetime(1990,1,1, tzinfo=pytz.timezone('UTC')), yp.dtm.datetime.now(pytz.timezone('UTC'))], fout=catname)
-		cl1=yp.catfromANSS(lon=lons,lat=lats, minMag=mc, dates0=[yp.dtm.datetime(1990,1,1, tzinfo=pytz.timezone('UTC')), yp.dtm.datetime.now(pytz.timezone('UTC'))], fout=catname)
+		#cl1=atp.catfromANSS(lon=[-120.5-dLon, 35.9-dLat],lat=[-120.5+dLon, 35.9+dLat], minMag=mc, dates0=[eqp.dtm.datetime(1990,1,1, tzinfo=pytz.timezone('UTC')), eqp.dtm.datetime.now(pytz.timezone('UTC'))], fout=catname)
+		cl1=atp.catfromANSS(lon=lons,lat=lats, minMag=mc, dates0=[eqp.dtm.datetime(1990,1,1, tzinfo=pytz.timezone('UTC')), eqp.dtm.datetime.now(pytz.timezone('UTC'))], fout=catname)
 	#
-	c1=yp.eqcatalog([])
+	c1=eqp.eqcatalog([])
 	c1.loadCatFromFile(catname)
 	#majAx=.4
 	majAx=A
@@ -1087,10 +1088,10 @@ def indoQuad(mc=4.75, targmag=9.1, rbavelen=None, bigmag=7.5, intlist=[25, 50, 1
 		refreshcat=True
 		catname='cats/indonesia2012.cat'
 	if refreshcat==True:
-		#cl1=yp.catfromANSS(lon=[92.0, 106.0],lat=[-9.0, 10.0], minMag=3.5, dates0=[yp.dtm.datetime(1990,1,1, tzinfo=pytz.timezone('UTC')), yp.dtm.datetime(2012,6,19, tzinfo=pytz.timezone('UTC'))], fout=catname)
-		cl1=yp.catfromANSS(lon=[92.0, 106.0],lat=[-9.0, 10.0], minMag=3.5, dates0=[yp.dtm.datetime(1990,1,1, tzinfo=pytz.timezone('UTC')), yp.dtm.datetime.now(pytz.timezone('UTC'))], fout=catname)
+		#cl1=atp.catfromANSS(lon=[92.0, 106.0],lat=[-9.0, 10.0], minMag=3.5, dates0=[eqp.dtm.datetime(1990,1,1, tzinfo=pytz.timezone('UTC')), eqp.dtm.datetime(2012,6,19, tzinfo=pytz.timezone('UTC'))], fout=catname)
+		cl1=atp.catfromANSS(lon=[92.0, 106.0],lat=[-9.0, 10.0], minMag=3.5, dates0=[eqp.dtm.datetime(1990,1,1, tzinfo=pytz.timezone('UTC')), eqp.dtm.datetime.now(pytz.timezone('UTC'))], fout=catname)
 	#
-	c1=yp.eqcatalog([])
+	c1=eqp.eqcatalog([])
 	c1.loadCatFromFile(catname)
 	#
 	#winlen=int(10**(targmag - (2.0+mc)))
@@ -1314,9 +1315,9 @@ def plotrbimap(datafile='data/sumatrarbimap.dat', fignum=1, mc=4.75, catfile='ca
 	# just make one long list to start with. we'll want ftime, winLen, +/-r
 
 def makeSaltonrbimapdata(catname='cats/salton.cat'):
-	c1=yp.eqcatalog([])
+	c1=eqp.eqcatalog([])
 	c1.loadCatFromFile(catname)
-	c1.rb=yp.rbi.intervalRecordBreaker(None)
+	c1.rb=eqp.rbi.intervalRecordBreaker(None)
 	#
 	a=makerbiMapData(mags=[5.5, 8.2], mc=2.5, dN=5, datafile='data/saltonrbidata.dat', refresh=False, ct=c1)
 	return a
@@ -1410,7 +1411,7 @@ def generalHazmap(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsize=
 	#			  m86: 2005 3 28
 	#			  m85, 2007 9 12
 	#          m86,m82: 2012 04 11
-	if dt0==None: dt0=yp.dtm.datetime(1990,1,1, tzinfo=pytz.timezone('UTC'))
+	if dt0==None: dt0=eqp.dtm.datetime(1990,1,1, tzinfo=pytz.timezone('UTC'))
 	for D in [dt0, todt]:
 		if D.tzinfo==None:
 			D=dtm.datetime(*D.timetuple()[:-2], tzinfo=pytz.timezone('UTC'))
@@ -1429,10 +1430,10 @@ def generalHazmap(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsize=
 	plt.ion()
 	#
 	if refreshcat:
-		#cl1=yp.catfromANSS(lon=[85.0, 105.0],lat=[-10.0, 10.0], minMag=3.5, dates0=[yp.dtm.date(1990,1,1), yp.dtm.date(2012,12,14)], fout=catname)
-		cl1=yp.catfromANSS(lon=lons,lat=lats, minMag=mc, dates0=[dt0, todt], fout=catname)
+		#cl1=atp.catfromANSS(lon=[85.0, 105.0],lat=[-10.0, 10.0], minMag=3.5, dates0=[eqp.dtm.date(1990,1,1), eqp.dtm.date(2012,12,14)], fout=catname)
+		cl1=atp.catfromANSS(lon=lons,lat=lats, minMag=mc, dates0=[dt0, todt], fout=catname)
 	else:
-		thiscat=yp.eqcatalog()
+		thiscat=eqp.eqcatalog()
 		thiscat.loadCatFromFile(fname=catname, minmag=mc)
 		cl1=thiscat.cat
 	#
@@ -1954,7 +1955,7 @@ def makeJapanHazMap(catname='cats/japancat4b.cat', catnum=0, mc=4.5, gridsize=1.
 	# getJapanQuadPlot(catname='cats/japancat4.cat', rbint=128, intervals=[64, 128, 256, 512], catnum=1, avelen=1):
 	#rbcat=getjapanRB(catname, rblen, False)	# returns [catalog, rbObj]
 	plt.ion()
-	catalog=yp.eqcatalog()
+	catalog=eqp.eqcatalog()
 	catalog.loadCatFromFile(catname)
 	#catalog=rbcat[0]
 	#catalog.rb=rbcat[1]
@@ -1991,7 +1992,7 @@ def getgridsize(mc=4.5, winlen=16, lat=45., sigmaExp=1.68):
 	return thisGS
 
 def getMidLat(thiscat, mc=None):
-	objcat=yp.eqcatalog()
+	objcat=eqp.eqcatalog()
 	objcat.loadCatFromFile(thiscat, mc)
 	lats=map(operator.itemgetter(1), objcat.cat)
 	midlat=numpy.mean(lats)
