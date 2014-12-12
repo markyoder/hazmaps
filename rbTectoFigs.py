@@ -67,6 +67,25 @@ def shortdate(dtm):
 	rstring = '%d-%d-%d'	% (dtm.month, dtm.day, dtm.year)
 	return rstring
 
+def napa2014(m=6.0, mc=2.5):
+	lat0 = 38.22
+	lon0 = -122.313
+	c1=atp.catfromANSS(lat=[lat0-.5, lat0+.5],lon=[lon0-.5, lon0+.5], minMag=2.5, dates0=[atp.dtm.datetime(1990,1,1, tzinfo=atp.pytz.timezone('UTC')), atp.dtm.datetime.now(atp.pytz.timezone('UTC'))])
+	cat_full = eqp.eqcatalog(c1)
+	cat_circ = eqp.eqcatalog(circularcat(incat=c1, latlon=[lat0, lon0], Rkm=10.0**(m/2.0 - 1.76)))
+	#
+	cat_full.rbomoriQuadPlot(mc=mc, targmag=m, plotevents=True, fignum=2)
+	cat_circ.rbomoriQuadPlot(mc=mc, targmag=m, plotevents=True, fignum=3)
+	#
+	f=plt.figure(2)
+	axx = f.axes
+	axx[2].plot([rtp.dtm.datetime(2014,8,24, tzinfo=rtp.pytz.timezone('UTC')), rtp.dtm.datetime(2014,8,24, tzinfo=rtp.pytz.timezone('UTC'))], [.1, 10.], 'g-', lw=2, zorder=7)
+	axx[2].plot(rtp.dtm.datetime(2014,8,24, tzinfo=rtp.pytz.timezone('UTC')), 1, 'g*', ms=18, zorder=7)
+	plt.draw()
+	
+	#
+	return None
+
 def EMCTriple(targmag=7.2, mc=2.5, rfactor=.5, fignum=0, lats=[31.5, 33.0], lons=[-116.15, -114.5]):
 	# a triple-plot + catalog
 	
