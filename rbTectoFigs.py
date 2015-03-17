@@ -555,8 +555,9 @@ def parkfieldQuads2(targmag=5.96, mc=1.5, rfactor=.5, weighted_ratios=False):
 		rb_poisson = ratio_sigma(float(Nsequence))[0]
 		rb_poisson_stderr = float(rb_poisson)**(1./math.sqrt(.1*Nsequence))	# not quite; we should properly calc. ave_len.
 		print "rb_poisson: %f, %f" % (rb_poisson, rb_poisson_stderr)
-		ax.plot([c1.getcat(i)[0][0], c1.getcat(i)[-1][0]], [rb_poisson_stderr, rb_poisson_stderr], 'b--', lw=2)
-		ax.plot([c1.getcat(i)[0][0], c1.getcat(i)[-1][0]], [1./rb_poisson_stderr, 1./rb_poisson_stderr], 'r--', lw=2)
+		this_cat = c1.getcat(len(c1.subcats))
+		ax.plot([this_cat[0][0], this_cat[-1][0]], [rb_poisson_stderr, rb_poisson_stderr], 'b--', lw=2)
+		ax.plot([this_cat[0][0], this_cat[-1][0]], [1./rb_poisson_stderr, 1./rb_poisson_stderr], 'r--', lw=2)
 
 		ax.plot([pfEvent[0]], [1.], 'r^', ms=12, zorder=17)
 		arrow_width=40.
