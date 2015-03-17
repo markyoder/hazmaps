@@ -74,17 +74,19 @@ def napa2014(m=6.0, mc=2.5):
 	cat_full = eqp.eqcatalog(c1)
 	cat_circ = eqp.eqcatalog(circularcat(incat=c1, latlon=[lat0, lon0], Rkm=10.0**(m/2.0 - 1.76)))
 	#
-	cat_full.rbomoriQuadPlot(mc=mc, targmag=m, plotevents=True, fignum=2)
+	cat_full.mapres='f'
+	#
+	cat_full.rbomoriQuadPlot(mc=mc, targmag=m, plotevents=True, fignum=2, thislw=2)
 	cat_circ.rbomoriQuadPlot(mc=mc, targmag=m, plotevents=True, fignum=3)
 	#
 	f=plt.figure(2)
 	axx = f.axes
-	axx[2].plot([rtp.dtm.datetime(2014,8,24, tzinfo=rtp.pytz.timezone('UTC')), rtp.dtm.datetime(2014,8,24, tzinfo=rtp.pytz.timezone('UTC'))], [.1, 10.], 'g-', lw=2, zorder=7)
-	axx[2].plot(rtp.dtm.datetime(2014,8,24, tzinfo=rtp.pytz.timezone('UTC')), 1, 'g*', ms=18, zorder=7)
+	axx[2].plot([dtm.datetime(2014,8,24, tzinfo=pytz.timezone('UTC')), dtm.datetime(2014,8,24, tzinfo=pytz.timezone('UTC'))], [.1, 10.], 'g-', lw=2, zorder=7)
+	axx[2].plot(dtm.datetime(2014,8,24, tzinfo=pytz.timezone('UTC')), 1, 'g*', ms=18, zorder=7)
 	plt.draw()
 	
 	#
-	return None
+	return cat_full
 
 def EMCTriple(targmag=7.2, mc=2.5, rfactor=.5, fignum=0, lats=[31.5, 33.0], lons=[-116.15, -114.5]):
 	# a triple-plot + catalog
