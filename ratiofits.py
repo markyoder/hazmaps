@@ -107,6 +107,22 @@ def doSumatra(mc=5.0, targmag=9.1, rbavelen=None, bigmag=9.5, intlist=None, catn
 		current_fig = plt.figure()
 		plt.clf()
 		catalog.rbomoriQuadPlot(targmag=mev[3], mc=mc, weighted=True, fignum=current_fig.number)
+		#
+		# poisson ratio limits:
+		these_axes = current_fig.axes
+		if len(these_axes)>=3:
+			ax_rb = these_axes[2]		
+			# poisson ratio bit:
+			# this doesn't vary much, so for now just do a regular gr guess:
+			n_rb_poisson = 10**(mev[3]-mc-2.0)
+			poisson_ratio_0 = list(ratio_sigma(n_rb_poisson, 1.0))
+			poisson_ratio_1 = list(ratio_sigma(n_rb_poisson, .5))
+			print 'sigma_ratios: ', poisson_ratio_0, poisson_ratio_1
+			#plt.figure(fignum0-1)
+			for y in poisson_ratio_0 + poisson_ratio_1:
+				#print catalog.getcat(0)[0]
+				ax_rb.plot([catalog.getcat(0)[0][0], catalog.getcat(0)[-1][0]], [y, y], 'm-', lw=2)
+		#
 		#rbratios = catalog.getNRBratios(intervals=None, winlen=interval_len, delta_t=1, reverse=False)
 		#rb_values = map(operator.itemgetter(4), rbratios)
 		#mean_rbs = [numpy.mean(rb_values[max(i-interval_len, 0):i+1]) for i, x in enumerate(rb_values)]
@@ -517,8 +533,10 @@ def plot_ratio_fits(fit_dict, new_figs=False, fignum0=2):
 		poisson_ratio_1 = list(ratio_sigma(rb_len, .5))
 		print 'sigma_ratios: ', poisson_ratio_0, poisson_ratio_1
 		plt.figure(fignum0-1)
-		for y in poisson_ratio_0 + poisson_ratio_1:
-			plt.plot([X[0], X[-1]], [y, y], 'm-', lw=2)
+		for y in poisson_ratio_0: # + poisson_ratio_1:
+			#y_prime = 10.**(math.log10(y)/math.sqrt(float(fit_set)))
+			y_prime = y**(1./math.sqrt(float(fit_set)))		# note fit_set ~ .1*rb_len
+			plt.plot([X[0], X[-1]], [y_prime, y_prime], 'm-', lw=2)
 		#
 	return None
 	

@@ -13,6 +13,7 @@ import glob
 import os
 import datetime as dtm
 import pytz
+import numpy
 
 from geographiclib.geodesic import Geodesic as ggp
 
@@ -550,6 +551,13 @@ def parkfieldQuads2(targmag=5.96, mc=1.5, rfactor=.5, weighted_ratios=False):
 			continue
 		#
 		ax=thisAxes[2]
+		# poisson error range:
+		rb_poisson = ratio_sigma(float(Nsequence))[0]
+		rb_poisson_stderr = float(rb_poisson)**(1./math.sqrt(.1*Nsequence))	# not quite; we should properly calc. ave_len.
+		print "rb_poisson: %f, %f" % (rb_poisson, rb_poisson_stderr)
+		ax.plot([c1.getcat(i)[0][0], c1.getcat(i)[-1][0]], [rb_poisson_stderr, rb_poisson_stderr], 'b--', lw=2)
+		ax.plot([c1.getcat(i)[0][0], c1.getcat(i)[-1][0]], [1./rb_poisson_stderr, 1./rb_poisson_stderr], 'r--', lw=2)
+
 		ax.plot([pfEvent[0]], [1.], 'r^', ms=12, zorder=17)
 		arrow_width=40.
 		ax.arrow(pfEvent[0]-dtm.timedelta(days=20), 4., 0., -1.5, width=arrow_width, head_width=3.*arrow_width, head_length=.3, color='m', zorder=11, alpha=.9) 	#
@@ -1231,10 +1239,11 @@ def tohokuQuads(targmag=9.0, mc=5.0, weighted_ratios=False):
 	#
 	#a=mhp.japanhm(mc=4.5, todt=mhp.dtm.datetime.now(mhp.pytz.timezone('UTC')), ndithers=10, nContours=nContours1, bigmag=7.0, lons=[135., 146.25], lats=[30., 41.75], refreshcat=True, dt0=mhp.dtm.datetime(1990,1,1, tzinfo=mhp.pytz.timezone('UTC')))
 	Nsequence = getNofm(targmag, mc)
+	print "seq_len: %d" % Nsequence
 	a=mhp.japanhm(mc=mc, todt=mhp.dtm.datetime.now(mhp.pytz.timezone('UTC')), winlen=110, ndithers=10, nContours=nContours1, bigmag=7.0, lons=[135., 148.5], lats=[30., 45.25], refreshcat=True, dt0=mhp.dtm.datetime(1990,1,1, tzinfo=mhp.pytz.timezone('UTC')))
 	c1=a.getcat()
 	print "nSubcats: ", len(c1.subcats)
-	while len(c1.subcats): c1.subcats.pop()
+	while len(c1.subcats)>0: c1.subcats.pop()
 	print "nSubcats: ", len(c1.subcats)
 	#
 	'''
@@ -1293,7 +1302,13 @@ def tohokuQuads(targmag=9.0, mc=5.0, weighted_ratios=False):
 		thisAxes = f.get_axes()
 		# plot Mainshock:
 		ax=thisAxes[2]
-		ax.plot([tohokuEvent[0]], [1.0], 'r^', ms=12, alpha=11)
+		ax.plot([tohokuEvent[0]], [1.0], 'r^', ms=12, alpha=1.)
+		# poisson error range:
+		rb_poisson = ratio_sigma(float(Nsequence))[0]
+		rb_poisson_stderr = float(rb_poisson)**(1./math.sqrt(.1*Nsequence))	# not quite; we should properly calc. ave_len.
+		print "rb_poisson: %f, %f" % (rb_poisson, rb_poisson_stderr)
+		ax.plot([c1.getcat(i)[0][0], c1.getcat(i)[-1][0]], [rb_poisson_stderr, rb_poisson_stderr], 'b--', lw=2)
+		ax.plot([c1.getcat(i)[0][0], c1.getcat(i)[-1][0]], [1./rb_poisson_stderr, 1./rb_poisson_stderr], 'r--', lw=2)
 		# draw catalog boundaries:
 		ax=thisAxes[3]
 		#
@@ -1663,4 +1678,7 @@ def winlen(m, mc, mt=7.6, doInt=True):
 		if winlen<1: winlen=1
 	#
 	return winlen
-		
+
+def ratio_sigma(N, sigma_factor=1.0):
+	r = (numpy.log(N) + sigma_factor*numpy.sqrt(numpy.log(N)))/(numpy.log(N) - sigma_factor*numpy.sqrt(numpy.log(N)))
+	return (r, 1./r)		
