@@ -46,6 +46,7 @@ import ANSStools as atp
 # bin by km.
 # calc. rb-ratios, etc.
 # convert bin coordinates to lat/lon and plot. there may be some overlapping
+#
 
 
 #def __init__(self, catalog=None, catnum=0, mc=2.5, gridsize=.5, ndithers=3, winlen=128, avlen=1, bigmag=5.0, fignum=0)
@@ -62,7 +63,7 @@ def makeHazMapDith(catname='cats/japancat4b.cat', catnum=0, mc=4.5, gridsize=Non
 		avlen = int(winlen/10)
 		if avlen==0: avlen=1
 
-	# generic ditherd haz-map maker. then, mazMapTo(your-favorite-date-of-catastrophe).
+	# generic ditherd haz-map maker. then, hazMapTo(your-favorite-date-of-catastrophe).
 	catalog=eqp.eqcatalog()
 	catalog.loadCatFromFile(catname)
 	#
@@ -1404,6 +1405,15 @@ def indoHazMapMovie(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsiz
 	# and print the movie with something like:
 	# avconv -i sumatrahmboxy%06d.png -r 50 ../sumatraboxy.mp4
 	# aka: avconv -i contour2/salton-%05d.png.png -r 50 saltonconts1.mp4
+
+# define nepal dataset; then call with makeHazMapDith(**nepal_prams)
+nepal_epi_lon = 84.698
+nepal_epi_lat = 28.175
+nepal_dlon = 5.
+nepal_dlat = 5.
+nepal_prams = {'todt':dtm.datetime(2015, 4, 25, tzinfo=pytz.timezone('UTC')), 'gridsize':.1, 'mc':5.0, 'catnum':0, 'catname':'cats/nepal_2015.cat', 'epicen':None, 'thresh':None, 'ndithers':10, 'winlen':20, 'sigma':1.68, 'avlen':None, 'bigmag':6.5, 'fignum':0, 'lons':[nepal_epi_lon-nepal_dlon, nepal_epi_lon+nepal_dlon], 'lats':[nepal_epi_lat-nepal_dlat, nepal_epi_lat+nepal_dlat], 'dt0':None, 'logZ':None, 'nContours':15, 'refreshcat':True}
+
+
 
 def generalHazmap(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsize=None, ndithers=4, winlen=20, sigma=1.68, avlen=None, bigmag=7.9, fignum=0, todt=dtm.datetime.now(pytz.timezone('UTC')), epicen=None, thresh=None, refreshcat=False, lats=[-9.0, 10.0], lons=[92.0, 106.0], dt0=None, logZ=None, nContours=14):
 	#
