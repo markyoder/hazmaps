@@ -1498,10 +1498,10 @@ def generalHazmap(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsize=
 		if ev[3]>bigmag:
 			x,y=objHM.cm(ev[2], ev[1])
 			for i in [0,2,3]:
-				plt.figure(i)
+				plt.figure(fignum+i)
 				plt.plot([x], [y], '*', ms=2*ev[3], zorder=10, alpha=.6, label='m%.2f, %d-%d-%d' % (ev[3], ev[0].year, ev[0].month, ev[0].day))
 	for i in [0,2,3]:
-		plt.figure(i)
+		plt.figure(fignum+i)
 		plt.legend(loc='best', numpoints=1)
 		plt.title('%s, $d\\lambda = %.4f$, $nDith=%d$, \n$m_c=%.2f$, $rblen=%d$, $avlen=%d$\n\n\n' % (fcdate, objHM.gridsize, objHM.ndithers, objHM.mc, objHM.winlen, objHM.avlen))
 	#
