@@ -48,6 +48,9 @@ import ANSStools as atp
 # convert bin coordinates to lat/lon and plot. there may be some overlapping
 #
 
+def japan_pacific_2015_m78():
+	a=mhp.generalHazmap(catname='cats/japanpac2015.cat', mc=4.5, ndithers=10, winlen=20, bigmag=7.0, refreshcat=True, lons=[140.5-5., 150.5+5.], lats=[27.83-5., 27.83+5.])
+	return a
 
 #def __init__(self, catalog=None, catnum=0, mc=2.5, gridsize=.5, ndithers=3, winlen=128, avlen=1, bigmag=5.0, fignum=0)
 def makeHazMapDith(catname='cats/japancat4b.cat', catnum=0, mc=4.5, gridsize=None, ndithers=3, winlen=20, sigma=1.68, avlen=None, bigmag=6.5, fignum=0, logZ=None):
