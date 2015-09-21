@@ -1411,11 +1411,14 @@ nepal_epi_lon = 84.698
 nepal_epi_lat = 28.175
 nepal_dlon = 5.
 nepal_dlat = 5.
-nepal_prams = {'todt':dtm.datetime(2015, 4, 25, tzinfo=pytz.timezone('UTC')), 'gridsize':.1, 'mc':5.0, 'catnum':0, 'catname':'cats/nepal_2015.cat', 'epicen':None, 'thresh':None, 'ndithers':10, 'winlen':20, 'sigma':1.68, 'avlen':None, 'bigmag':6.5, 'fignum':0, 'lons':[nepal_epi_lon-nepal_dlon, nepal_epi_lon+nepal_dlon], 'lats':[nepal_epi_lat-nepal_dlat, nepal_epi_lat+nepal_dlat], 'dt0':None, 'logZ':None, 'nContours':15, 'refreshcat':True}
+# 'todt':dtm.datetime(2015, 4, 25, tzinfo=pytz.timezone('UTC'))
+nepal_prams = {'todt':dtm.datetime(2015, 5, 12, tzinfo=pytz.timezone('UTC')), 'gridsize':None, 'mc':5.0, 'catnum':0, 'catname':'cats/nepal_2015.cat', 'epicen':None, 'thresh':None, 'ndithers':20, 'winlen':20, 'sigma':1.68, 'avlen':None, 'bigmag':6.5, 'fignum':0, 'lons':[nepal_epi_lon-nepal_dlon, nepal_epi_lon+nepal_dlon], 'lats':[nepal_epi_lat-nepal_dlat, nepal_epi_lat+nepal_dlat], 'dt0':None, 'logZ':None, 'nContours':15, 'refreshcat':True}
 
 
 
-def generalHazmap(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsize=None, ndithers=4, winlen=20, sigma=1.68, avlen=None, bigmag=7.9, fignum=0, todt=dtm.datetime.now(pytz.timezone('UTC')), epicen=None, thresh=None, refreshcat=False, lats=[-9.0, 10.0], lons=[92.0, 106.0], dt0=None, logZ=None, nContours=14):
+def generalHazmap(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsize=None, ndithers=4, winlen=20, sigma=1.68, avlen=None, bigmag=7.9, fignum=0, todt=None, epicen=None, thresh=None, refreshcat=False, lats=[-9.0, 10.0], lons=[92.0, 106.0], dt0=None, logZ=None, nContours=14):
+	#
+	if todt==None: todt=dtm.datetime.now(pytz.timezone('UTC'))
 	#
 	# todates: m9: 2004 12 24
 	#			  m86: 2005 3 28
