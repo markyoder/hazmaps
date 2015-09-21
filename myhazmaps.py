@@ -1476,6 +1476,9 @@ def generalHazmap(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsize=
 	while cl1[fcindex][0] and (-fcindex)>len(cl1) > todt: fcindex-=1
 	#fcdatetime = cl1[-1][0]
 	fcdatetime = cl1[fcindex][0]
+	if isinstance(fcdatetime, numpy.datetime64):
+		# convert to regular datetime object (which apparently is like a list).
+		fcdatetime = fcdatetime.tolist()
 	#
 	#fcdate='%d-%d-%d' % (todt.year, todt.month, todt.day)
 	fcdate='%d-%d-%d' % (fcdatetime.year, fcdatetime.month, fcdatetime.day)
@@ -1797,7 +1800,11 @@ def chilehm(catname='cats/chile.cat', catnum=0, mc=4.5, gridsize=None, ndithers=
 	# note: wikipedia lists two epicenter locations:
 	#x1,y1=c2.catmap(-72.733, -35.909)
 	#x2,y2=c2.catmap(-73.239, -36.290)
+	#catname_name, catname_path = os.path.split(catname)
+	#if not isdir(catname_path): os.makedirs(catname_path)
 	# there do not appear to be sufficient data to draw a precursory HM, but the RBTS come out beautifully.
+	#if refresh_cat:
+	#	catalog = atp.catfromANSS(lon=lons, lat=lats, minMag=mc, dates0=[dtm.datetime(2000,01,01, tzinfo=atp.tzutc), None], Nmax=None, fout=catname, rec_array=True)
 	#
 	print "getting chilehm.", lats, lons
 	#
