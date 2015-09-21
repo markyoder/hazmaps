@@ -48,6 +48,9 @@ import ANSStools as atp
 # convert bin coordinates to lat/lon and plot. there may be some overlapping
 #
 
+def japan_pacific_2015_m78():
+	a=mhp.generalHazmap(catname='cats/japanpac2015.cat', mc=4.5, ndithers=10, winlen=20, bigmag=7.0, refreshcat=True, lons=[140.5-5., 150.5+5.], lats=[27.83-5., 27.83+5.])
+	return a
 
 #def __init__(self, catalog=None, catnum=0, mc=2.5, gridsize=.5, ndithers=3, winlen=128, avlen=1, bigmag=5.0, fignum=0)
 def makeHazMapDith(catname='cats/japancat4b.cat', catnum=0, mc=4.5, gridsize=None, ndithers=3, winlen=20, sigma=1.68, avlen=None, bigmag=6.5, fignum=0, logZ=None):
@@ -1476,6 +1479,9 @@ def generalHazmap(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsize=
 	while cl1[fcindex][0] and (-fcindex)>len(cl1) > todt: fcindex-=1
 	#fcdatetime = cl1[-1][0]
 	fcdatetime = cl1[fcindex][0]
+	if isinstance(fcdatetime, numpy.datetime64):
+		# convert to regular datetime object (which apparently is like a list).
+		fcdatetime = fcdatetime.tolist()
 	#
 	#fcdate='%d-%d-%d' % (todt.year, todt.month, todt.day)
 	fcdate='%d-%d-%d' % (fcdatetime.year, fcdatetime.month, fcdatetime.day)
@@ -1501,10 +1507,10 @@ def generalHazmap(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsize=
 		if ev[3]>bigmag:
 			x,y=objHM.cm(ev[2], ev[1])
 			for i in [0,2,3]:
-				plt.figure(i)
+				plt.figure(fignum+i)
 				plt.plot([x], [y], '*', ms=2*ev[3], zorder=10, alpha=.6, label='m%.2f, %d-%d-%d' % (ev[3], ev[0].year, ev[0].month, ev[0].day))
 	for i in [0,2,3]:
-		plt.figure(i)
+		plt.figure(fignum+i)
 		plt.legend(loc='best', numpoints=1)
 		plt.title('%s, $d\\lambda = %.4f$, $nDith=%d$, \n$m_c=%.2f$, $rblen=%d$, $avlen=%d$\n\n\n' % (fcdate, objHM.gridsize, objHM.ndithers, objHM.mc, objHM.winlen, objHM.avlen))
 	#
@@ -1797,7 +1803,11 @@ def chilehm(catname='cats/chile.cat', catnum=0, mc=4.5, gridsize=None, ndithers=
 	# note: wikipedia lists two epicenter locations:
 	#x1,y1=c2.catmap(-72.733, -35.909)
 	#x2,y2=c2.catmap(-73.239, -36.290)
+	#catname_name, catname_path = os.path.split(catname)
+	#if not isdir(catname_path): os.makedirs(catname_path)
 	# there do not appear to be sufficient data to draw a precursory HM, but the RBTS come out beautifully.
+	#if refresh_cat:
+	#	catalog = atp.catfromANSS(lon=lons, lat=lats, minMag=mc, dates0=[dtm.datetime(2000,01,01, tzinfo=atp.tzutc), None], Nmax=None, fout=catname, rec_array=True)
 	#
 	print "getting chilehm.", lats, lons
 	#
