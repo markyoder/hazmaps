@@ -37,6 +37,12 @@ import urllib
 import eqcatalog as yp 
 import rbIntervals as rbi
 
+#
+# python3 vs python2 issues:
+# a bit of version 3-2 compatibility:
+if sys.version_info.major>=3:
+	xrange=range
+
 class hazCrack(object):
 	# record-breaking hazard map on crack.
 	
@@ -120,12 +126,11 @@ class hazCrack(object):
 		#for i in xrange(len(self.hazmaps[0].rbRatios)):
 		#	for hm in self.hazmaps:
 		for hm in self.hazmaps:
-			#print len(hm.rbRatios)
 			for i in xrange(len(hm.rbRatios)):
 				#cX+=[hm.getLon(i) + (self.gridsize-self.dL)/2.0]
 				#cY+=[hm.getLat(i) + (self.gridsize-self.dL)/2.0]
 				#cZ+=[hm.rbRatios[i]]
-				#print "ahhh!!"
+				#
 				thisval=hm.rbRatios[i]
 				#if thisval==None: thisval=0
 				if thisval!=None:
@@ -235,7 +240,7 @@ class hazCrack(object):
 	
 	def plotEvents(self, events=None, symbolstr=',', msize=1, fignum=0, alpha=1.0, zorder=5):
 		cm=self.hazmaps[0]
-		print "doing events. %d, %d" % (len(events), fignum)
+		print("doing events. %d, %d" % (len(events), fignum))
 		#
 		#fignum=1
 		# assume events come in 'catalog' form [dtm, lat, lon, mag, ...]
@@ -421,7 +426,6 @@ class hazCrack(object):
 													# but, we'll want to report some rate of m>reffMag
 		
 		#
-		#print self.Z2d.min(), self.Z2d.max(), norm
 		#tics = [0,10,20,40,80]
 		#tics = [round(self.Z2d.min(),3), round(self.Z2d.max(),3)]
 		#timefactExp = math.log10(year2secs)
@@ -447,7 +451,7 @@ class hazCrack(object):
 		poissonSigma = (.5*math.log10(self.winlen))/self.logZ
 		tsn = '-%.2f' % poissonSigma
 		tsp = '%.2f' % poissonSigma
-		#print "max set: ", self.Z2d.max(), timefactExp, ratefactorExp
+		#print("max set: ", self.Z2d.max(), timefactExp, ratefactorExp)
 		tics = [zmin, -poissonSigma, 0.0, poissonSigma, zmax]
 		tlbls = [t1, tsn, 0.0, tsp, t2]
 		# clean up labels/tics in case max/min values are near poisson threshold.
@@ -457,7 +461,6 @@ class hazCrack(object):
 		if abs(-poissonSigma - zmin)<.1:
 			tics.pop(0)
 			tlbls.pop(0)
-		#print t1, t2
 		#
 		#cb1 = mpl.colorbar.ColorbarBase(axe, norm=norm, ticks=tics, format="%g%%", orientation='vertical')
 		cb1 = mpl.colorbar.ColorbarBase(axe, norm=norm, ticks=tics, format="%.2f", orientation='vertical')
@@ -533,7 +536,6 @@ class hazCrack(object):
 			plt.plot(lonsBlue, latsBlue, 'b.')
 			
 			#plt.plot(lonsCyan, latsCyan, '%s' % yp.pyicon(hmindex), color='y')
-			#print hmindex
 			hmindex+=1
 	
 	def simpleBoxes(self, fignum=0, thresh=0.0, plotevents=1, mapres=None):
@@ -547,7 +549,7 @@ class hazCrack(object):
 		if thresh==None:
 			thresh=((self.winlen/2.)-.577 - math.log(self.winlen))/((self.winlen/2.)+.577 + math.log(self.winlen))
 			thresh=abs(math.log10(thresh))
-			# print "noisethresh: %f" % (noisethresh)
+			# print("noisethresh: %f" % (noisethresh))
 		#
 		catdate=self.hazmaps[0].catalog.cat[-1][0]
 		hmdatestr='%d-%d-%d, %d:%d:%d (UTC)' % (self.hmdate.year, self.hmdate.month, self.hmdate.day, self.hmdate.hour, self.hmdate.minute, self.hmdate.second)
@@ -645,7 +647,6 @@ class hazCrack(object):
 			#plt.plot(lonsBlue, latsBlue, 'b.')
 			
 			#plt.plot(lonsCyan, latsCyan, '%s' % yp.pyicon(hmindex), color='y')
-			#print hmindex
 			hmindex+=1	
 	
 	def getClusters(self, beta=2):
@@ -703,7 +704,7 @@ class hazCrack(object):
 			for clst in clustlist:
 				nsquares+=len(clst)
 			rblen=2*int(self.winlen*nsquares/(self.ndithers**2))
-			print "rblen = %d" % rblen
+			print("rblen = %d" % rblen)
 		self.rb.fullCat=c1.getcat(0)
 		self.rb.shockCat=c1.getcat(0)
 		#
@@ -741,11 +742,11 @@ class hazCrack(object):
 		if justTop==True: i0=-self.winlen
 		for clust in clustlist:
 			for elem in clust:
-				#print "clustLen: %d" % len(clust[i0:])
+				#print("clustLen: %d" % len(clust[i0:]))
 				(hazmapIndex, subcatIndex) = self.getMapIndex(elem)
 				#newcat+=self.hazmaps[hazmapIndex].catalog.subcats[subcatIndex][1]	# because eacy point on the haz-map represents a stastic from a set of events in a subcat.
 				newcat+=self.hazmaps[hazmapIndex].catalog.subcats[subcatIndex][1][i0:]	# because eacy point on the haz-map represents a stastic from a set of events in a subcat.
-				#print hazmapIndex, subcatIndex
+				#print(hazmapIndex, subcatIndex)
 		#
 		# now, strip duplicates:
 		#rcat=list(set(newcat))
@@ -842,7 +843,7 @@ class hazCrack(object):
 				L=squareL
 			else:
 				# we don't know how to parse it.
-				print "array width not defined."
+				print("array width not defined.")
 				return None
 		'''
 		#
@@ -902,7 +903,7 @@ class hazCrack(object):
 			#clustList[rw[1]][1]+=clustList[rw[0]][1]
 			#clustList[rw[0]][1]=[]
 			if targetindex==srcindex:
-				#print "target/source problem"
+				#print("target/source problem")
 				continue
 			clustList[targetindex][1]+=clustList[srcindex][1]
 			clustList[srcindex][1]=[]
@@ -921,7 +922,7 @@ class hazCrack(object):
 		#
 		xsq=(nx*math.cos(rlat)*gridsize*llkm/dithers)**2. + (ny*gridsize*llkm/dithers)**2
 		L=xsq**.5
-		print "length: %f" % L
+		print("length: %f" % L)
 		#
 		m=2.*math.log10(L*gamma)+3.25
 		return m
@@ -981,7 +982,7 @@ class rbHazMapLean(object):
 		self.thiscat0=self.catalog.getcat(catnum)
 		self.thiscat=self.thiscat0	# simplify this? do we need these two subcats?
 		#self.thiscat=self.thiscat0
-		#print "mainEvent: %s" % mev
+		#print("mainEvent: %s" % mev)
 		#
 		self.llrange=self.catalog.getLatLonRange(self.thiscat)
 		# maps will stack better if we add phi to both sides of llrange:
@@ -1033,8 +1034,8 @@ class rbHazMapLean(object):
 		#
 		for rw in self.catalog.getcat(0):
 			if rw[3]<self.mc: continue
-			#print rw[0]
-			#print forecastDate
+			#print(rw[0])
+			#print(forecastDate)
 			if rw[0]<forecastDate: precat+=[rw]
 			if rw[0]>=forecastDate: postcat+=[rw]
 		#
@@ -1069,7 +1070,7 @@ class rbHazMapLean(object):
 		#
 		for rw in preCat:
 			#if rwcount>len(preCat): 
-			#	print "stepping off pre-cat"
+			#	print("stepping off pre-cat")
 			#	continue
 			if rw[3]<self.mc: continue
 			ilat=(rw[1]-self.lat0)/self.gridsize
@@ -1096,7 +1097,7 @@ class rbHazMapLean(object):
 		if catalog==None: catalog=self.catalog
 		reds=[]
 		blues=[]
-		#print 'as of %s' % str(self.thiscat[-1][0])
+		#print('as of %s' % str(self.thiscat[-1][0]))
 		#cm=catalog.plotCatMap(thiscat, True, False, None, None, 'best', True, 'g,', None, self.fignum)
 		#
 		#return catalog
@@ -1164,7 +1165,7 @@ class rbHazMapLean(object):
 		plt.plot(lonsRed, latsRed, 'r%s' % yp.pyicon(0))
 		plt.plot(lonsBlue, latsBlue, 'b%s' % yp.pyicon(0))
 		#plt.plot(lonsCyan, latsCyan, '%s' % yp.pyicon(0), color='y')
-		#print hmindex
+		#print(hmindex)
 			
 	def getSquare(self, xy=[], dx=.1):
 		# xy = ll corner.
@@ -1216,12 +1217,12 @@ class rbHazMap(object):
 		#self.thiscat0=self.catalog.getcat(catnum)
 		self.thiscat0=self.catalog.getcat(0)
 		mev=self.catalog.getMainEvent(self.thiscat0)
-		print mev
+		print(mev)
 		self.mev=mev
 		self.thiscat=self.thiscat0[0:mev[4]-1]	# eliminate all events after mainshock...
 		self.precatindex=len(self.thiscat)-1
 		#self.thiscat=self.thiscat0
-		#print "mainEvent: %s" % mev
+		#print("mainEvent: %s" % mev)
 		#
 		self.llrange=self.catalog.getLatLonRange(self.thiscat)
 		# most things should work better if we add phi to both sides of llrange (not just the source side).
@@ -1315,7 +1316,7 @@ class rbHazMap(object):
 		#for rw in thiscat:
 		for rw in preCat:
 			#if rwcount>len(preCat): 
-			#	print "stepping off pre-cat"
+			#	print("stepping off pre-cat")
 			#	continue
 			if rw[3]<self.mc: continue
 			ilat=(rw[1]-self.lat0)/self.gridsize
@@ -1341,11 +1342,11 @@ class rbHazMap(object):
 				# bigeqs+=[rw]
 				x,y=self.cm(rw[2], rw[1])
 				self.cm.plot(x,y, '*', ms=15, label='m%f, %s' % (rw[3], str(rw[0])))
-				#print 'm%f, %s' % (rw[3], str(rw[0]))
+				#print('m%f, %s' % (rw[3], str(rw[0])))
 		#x,y=self.cm(self.mev[2], self.mev[1])
-		#print x,y
+		#print(x,y)
 		x,y=self.cm(mev[2], mev[1])
-		#print x,y
+		#print(x,y)
 		self.cm.plot(x,y, 'r*', ms=25,  label='ms:%f, %s' % (rw[3], str(rw[0])))		
 		#
 		#plt.gca().set_title('dtm: %s' % str(preCat[-1][0]))
@@ -1487,7 +1488,7 @@ class rbHazMap(object):
 		if catalog==None: catalog=self.catalog
 		reds=[]
 		blues=[]
-		#print 'as of %s' % str(self.thiscat[-1][0])
+		#print('as of %s' % str(self.thiscat[-1][0]))
 		#cm=catalog.plotCatMap(thiscat, True, False, None, None, 'best', True, 'g,', None, self.fignum)
 		#
 		#return catalog
@@ -1506,10 +1507,6 @@ class rbHazMap(object):
 			meanr=numpy.average(rs[-self.avlen:])
 			self.rbRatios=meanr
 			#####
-			
-			#print meanr
-			#
-			#gridStats+=[[ct[0], plt.date2num(ct[1][-1][0])-plt.date2num(ct[1][0][0]), catalog.rb.getIntervalRatios(mc, winlen, ct[1])[-1][-1]]]
 			#gridStats+=[[ct[0], plt.date2num(ct[1][-1][0])-plt.date2num(ct[1][0][0]), meanr]]
 			rw=[ct[0], plt.date2num(ct[1][-1][0])-plt.date2num(ct[1][0][0]), meanr]
 			#
@@ -1571,7 +1568,6 @@ def crackMap(objCat=None, catnum=0, mc=2.5, gridsize=None, ndithers=4, winlen=20
 	if avlen==None:
 		avlen=int(winlen/10)
 		if avlen==0: avlen=1
-		#print "avelen: %d" % avlen
 	# get gridsize/winlen:
 	# getgridsize(mc=4.5, winlen=16, lat=45., sigmaExp=1.68)
 	# def getWinlen(mc=4.5, gridsize=1.0, lat=45., sigmaExp=1.68):
@@ -1596,7 +1592,7 @@ def crackMap(objCat=None, catnum=0, mc=2.5, gridsize=None, ndithers=4, winlen=20
 	#
 	magres=objHM.guessMag(nsquares=1, mc=mc, deltas=2.0, beta=1.0, rblen=winlen, dithers=ndithers**2)
 	magresDith=objHM.guessMag(nsquares=ndithers**2, mc=mc, deltas=2.0, beta=1.0, rblen=winlen, dithers=ndithers**2)
-	#print "mag-res: %f/%f (dithering=%d)" % (magres, magresDith, ndithers)
+	#print("mag-res: %f/%f (dithering=%d)" % (magres, magresDith, ndithers))
 	#
 	#plt.figure(fignum)
 	#objHM.simpleBoxes(fignum=fignum, thresh=thresh)

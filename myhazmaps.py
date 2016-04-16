@@ -35,6 +35,12 @@ import hazmap as hmp
 import BASScast as bcp
 import eqcatalog as eqp
 import ANSStools as atp
+#
+#
+# python3 vs python2 issues:
+# a bit of version 3-2 compatibility:
+if sys.version_info.major>=3:
+	xrange=range
 
 #
 # some notes:
@@ -93,7 +99,7 @@ def makeHazMapDith2(catalog=None, catnum=0, mc=4.5, gridsize=None, ndithers=3, w
 	#
 	llrange=catalog.getLatLonRange()
 	centerlat=llrange[0][0] + (llrange[1][0]-llrange[0][0])/2.
-	print centerlat
+	#print(centerlat)
 	#mysigmaexp=1.68
 	mysigmaexp = sigma
 	#	
@@ -101,10 +107,10 @@ def makeHazMapDith2(catalog=None, catnum=0, mc=4.5, gridsize=None, ndithers=3, w
 	if winlen==None:
 		# we've been given gridsize; calculate the winlen.
 		winlen=getWinlen(mc, gridsize, centerlat, mysigmaexp)
-		print "set winlen: %d from gridsize: %f" % (winlen, gridsize)
+		print ("set winlen: %d from gridsize: %f" % (winlen, gridsize))
 	if gridsize==None:
 		gridsize=getgridsize(mc=mc, winlen=winlen, lat=centerlat, sigmaExp=mysigmaexp)
-		print "set gridsize: %f from winlen: %d" % (gridsize, winlen)
+		print ("set gridsize: %f from winlen: %d" % (gridsize, winlen))
 	
 	#objHM=hmp.hazCrack(catalog, catnum, mc, gridsize, ndithers, winlen, avlen, bigmag, fignum)
 	objHM=hmp.hazCrack(catalog=catalog, catnum=catnum, mc=mc, gridsize=gridsize, ndithers=ndithers, winlen=winlen, avlen=avlen, bigmag=bigmag, fignum=fignum, logZ=logZ)
@@ -197,7 +203,7 @@ def makeparkfieldmap(catname='cats/parkfield.cat', catnum=0, mc=1.5, gridsize=No
 	noisethresh2=2.*(.577+math.log(winlen))/winlen
 	noisethresh=abs(math.log10(noisethresh))
 	noisethresh2=abs(math.log10(noisethresh2))
-	print "noise thresholds: %f, %f" % (noisethresh, noisethresh2)
+	print("noise thresholds: %f, %f" % (noisethresh, noisethresh2))
 	#
 	# pfc=eqp.eqcatalog()
 	# pfc.loadCatFromFile('cats/parkfield.cat')
@@ -357,7 +363,7 @@ def makeJapanHazMapDith(catname='cats/japancat.cat', catnum=0, mc=4.5, gridsize=
 	if avlen==None:
 		avlen=int(winlen/10)
 		if avlen<1: avlen=1
-		print "avlen: %d" % avlen
+		print("avlen: %d" % avlen)
 	objHM=makeHazMapDith(catname, catnum, mc, gridsize, ndithers, winlen, sigma, avlen, bigmag, fignum, logZ=None)
 	objHM.bigmag=bigmag
 	objHM.epicen=epicen
@@ -489,7 +495,6 @@ def elmayorAftershocks(mshock=5.0, refreshcat=True,lons=[-116.5, -114.5], lats=[
 	#
 	plt.figure(2)
 	for rw in shocks:
-		#print rw, str(rw[0])
 		x,y=c1.catmap(rw[2], rw[1])
 		plt.plot([x], [y], '*', ms=12, label='$%.2f: %s' % (rw[3], str(rw[0])), zorder=17 )
 	#
@@ -616,10 +621,10 @@ def socalswarm(catname='cats/scswarm2011.cat', catnum=0, mc=2.5, gridsize=None, 
 	# z=mhp.generalHazmap(catname='cats/socalswarm.cat', mc=2.5, lats=[36.25,36.75], lons=[-121.4, -120.9], refreshcat=True)
 
 	#
-	#print dts
-	#print catdate
-	#print lats
-	#print lons
+	#print(dts)
+	#print(catdate)
+	#print(lats)
+	#print(lons)
 	#
 	# quakes of interest are:
 	#2011/8/27 7:18:21.150000	36.5843	-121.1808	4.64	7.84
@@ -682,7 +687,7 @@ def generalHazMovie(catname='cats/scswarm2011.cat', catnum=0, mc=4.75, gridsize=
 	#framenum=0
 	framenum=frame0
 	framenumstr=('00000' + str(framenum))[-5:]
-	print "initial frame-str: %s" % framenumstr
+	print("initial frame-str: %s" % framenumstr)
 	while thisdt<dts[1]:
 		#
 		objHM.hazMapTo(thisdt)
@@ -710,7 +715,7 @@ def generalHazMovie(catname='cats/scswarm2011.cat', catnum=0, mc=4.75, gridsize=
 			#if fn==fignums[-1]: continue	# we only want one contour plot
 			#
 			# save plots:
-			#print "saving as: %s%s-%s" % (figdirs[i], nameroot, framenumstr)
+			#print("saving as: %s%s-%s" % (figdirs[i], nameroot, framenumstr))
 			fnameroot='%s%s-%s' % (figdirs[i], nameroot, framenumstr)
 			plt.savefig('%s.png' % fnameroot)
 			#os.system('convert %s.png %s.jpg' % (fnameroot, fnameroot))
@@ -924,7 +929,7 @@ def makeMeximap(catname='cats/mexicat-short.cat', catnum=0, mc=2.5, gridsize=Non
 	#hmx, hmy=scm.hazmaps[0].catalog.catmap(epicen[0], epicen[1])
 	for fnum in [0,2,3]:
 		plt.figure(fignum+fnum)
-		# print "plotting mev on figure %d" % (fnum+fignum)
+		# print("plotting mev on figure %d" % (fnum+fignum))
 		scm.plotEvent([-115.3, 32.13], fignum=(fignum+fnum), symbolstr='k*', msize=24)
 		scm.plotEvent([-115.3, 32.13], fignum=(fignum+fnum), symbolstr='r*', msize=20)
 		
@@ -959,7 +964,7 @@ def makeMeximap(catname='cats/mexicat-short.cat', catnum=0, mc=2.5, gridsize=Non
 	# nsquares=None, mc=None, deltas=2.2, beta=2.0, rblen=None, dithers=None)
 	magres=scm.guessMag(nsquares=1, mc=mc, deltas=2.0, beta=1.0, rblen=winlen, dithers=ndithers**2)
 	magresDith=scm.guessMag(nsquares=ndithers**2, mc=mc, deltas=2.0, beta=1.0, rblen=winlen, dithers=ndithers**2)
-	print "mag-res: %f/%f (dithering=%d)" % (magres, magresDith, ndithers)
+	print("mag-res: %f/%f (dithering=%d)" % (magres, magresDith, ndithers))
 	
 	return scm
 
@@ -995,7 +1000,7 @@ def makeSocalMap(catname='cats/socal.cat', catnum=0, mc=2.5, gridsize=None, ndit
 	#
 	magres=objHM.guessMag(nsquares=1, mc=mc, deltas=2.0, beta=1.0, rblen=winlen, dithers=ndithers**2)
 	magresDith=objHM.guessMag(nsquares=ndithers**2, mc=mc, deltas=2.0, beta=1.0, rblen=winlen, dithers=ndithers**2)
-	print "mag-res: %f/%f (dithering=%d)" % (magres, magresDith, ndithers)
+	print("mag-res: %f/%f (dithering=%d)" % (magres, magresDith, ndithers))
 	#
 	plt.figure(fignum)
 	objHM.simpleBoxes(fignum=fignum, thresh=thresh, mapres=mapres)
@@ -1017,7 +1022,7 @@ def makeSocalMap(catname='cats/socal.cat', catnum=0, mc=2.5, gridsize=None, ndit
 	'''
 	for fn in [0,2,3]:
 		plt.figure(fn)
-		print "plot rivers and stuff %d" % fn
+		print("plot rivers and stuff %d" % fn)
 		#objHM.hazmaps[0].catalog.catmap.drawcountries(zorder=1, linewidth=1)
 		#objHM.hazmaps[0].catalog.catmap.drawstates(zorder=1, linewidth=1)
 		#objHM.hazmaps[0].catalog.catmap.drawmapscale(lon=-115., lat=33., lon0=-115.5, lat0=32.5, length=75., labelstyle='simple', barstyle='simple')
@@ -1103,7 +1108,7 @@ def indoQuad(mc=4.75, targmag=9.1, rbavelen=None, bigmag=7.5, intlist=[25, 50, 1
 	#winlen=int(10*(int(winlen/10)))
 	if rbavelen==None: avlen=getNave(m=targmag, mt=mt, mc=mc)
 	winlen=int(getNsample(m=targmag, mc=mc, mt=mt, doint=True))
-	print "rbts for winlen=%d" % winlen
+	print("rbts for winlen=%d" % winlen)
 	#
 	arb=c1.rbomoriQuadPlot(mc=mc, winlen=winlen, rbavelen=avlen, bigmag=bigmag, intlist=intlist, plotevents=plotevents, logZ=None)
 	#arb=c1.rbomoriQuadPlot(mc=mc, winlen=winlen, rbavelen=rbavelen, bigmag=bigmag, intlist=intlist, plotevents=plotevents, logZ=None)
@@ -1148,11 +1153,8 @@ def getNsample(m, mc, mt=7.6, dm=1.0, b1=1.0, b2=1.5, dms0=1.0, doint=True, dmMo
 		#
 		winlen = 10**(1.0*(mt-mc) + 1.5*(targmag-mt) - dms - thisdm)		# as opposed to dm reletive to b=1.5.
 	#
-	#winlen=int(10*round(winlen/10))
-	#print "winlen0: %d" % winlen
 	if doint: winlen=int(round(winlen,-1))
-	#print "winlen0: %d" % winlen
-	if winlen<1: winlen=1
+	winlen = max(winlen,1)
 	#
 	return winlen
 			
@@ -1215,7 +1217,6 @@ def plotrbimap(datafile='data/sumatrarbimap.dat', fignum=1, mc=4.75, catfile='ca
 	for rw in f:
 		if rw[0]=='#': continue
 		rws=rw.split('\t')
-		#print rws
 		N=int(rws[0])
 		fdt=float(rws[3])
 		r=float(rws[4])	# maybe - rws[4]
@@ -1226,7 +1227,7 @@ def plotrbimap(datafile='data/sumatrarbimap.dat', fignum=1, mc=4.75, catfile='ca
 			Xs+=[fdt]	# this will be the longest set and so will have all the dates
 		#
 		if N!=prevN:
-			#print "switching: ", prevN, N
+			#print("switching: ", prevN, N)
 			if len(Zij)>0:
 				Nvals+=[prevN]
 				# early-fill short sequences
@@ -1296,7 +1297,6 @@ def plotrbimap(datafile='data/sumatrarbimap.dat', fignum=1, mc=4.75, catfile='ca
 		thismag = float(rws[3])
 		if thismag<mc+3.0: continue
 		#
-		#print rws[0], rws
 		thisfdt =  mpd.datestr2num(rws[0])
 		thisdt = mpd.num2date(thisfdt)
 		thisyr = float(thisdt.year)
@@ -1337,12 +1337,12 @@ def makerbiMapData(mags=[4.75, 9.1], mc=4.75, dN=10, datafile='data/sumatrarbima
 	N2=10*int(N2/10)
 	N=N1
 	if N<10: N=10
-	print "N, N1, N2", N, N1, N2
+	print("N, N1, N2", N, N1, N2)
 	f=open(datafile, 'w')
 	f.write('#rbi map\n#n, dt, ftd, log(r)\n')
 	f.close()
 	while N<=N2:
-		print "N=%d" % N
+		print("N=%d" % N)
 		theserbi=ct.rb.getIntervalRatios(minmag=mc, windowLen=N, cat0=ct.getcat(0), deltaipos=1, logZ=None)
 		f=open(datafile, 'a')
 		#
@@ -1370,7 +1370,7 @@ def indoHazMapMovie(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsiz
 	#maxr = .8*maxr
 	maxr = .75
 	minr = -.9
-	print "logZ: ", objHM.logZ, "winlen: %d/%f" % (objHM.winlen, math.log10(objHM.winlen))
+	print("logZ: ", objHM.logZ, "winlen: %d/%f" % (objHM.winlen, math.log10(objHM.winlen)))
 	#
 	thisdate=dts[0]
 	#fileindex=0
@@ -1456,7 +1456,7 @@ def generalHazmap(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsize=
 	if avlen==None:
 		avlen=int(winlen/10)
 		if avlen==0: avlen=1
-		print "avelen: %d" % avlen
+		print("avelen: %d" % avlen)
 	# get gridsize/winlen:
 	# getgridsize(mc=4.5, winlen=16, lat=45., sigmaExp=1.68)
 	# def getWinlen(mc=4.5, gridsize=1.0, lat=45., sigmaExp=1.68):
@@ -1472,7 +1472,6 @@ def generalHazmap(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsize=
 	#objHM=makeHazMapDith(catname, catnum, mc, gridsize, ndithers, winlen, sigma, avlen, bigmag, fignum)
 	objHM=makeHazMapDith(catname, catnum, mc, gridsize, ndithers, winlen, sigma, avlen, bigmag, fignum, logZ=logZ)
 	objHM.mapres='i'
-	#print "hazmap made in mscm"
 	objHM.epicen=epicen
 	objHM.hazMapTo(todt)
 	fcindex=-1
@@ -1485,11 +1484,11 @@ def generalHazmap(catname='cats/indonesia2012.cat', catnum=0, mc=4.75, gridsize=
 	#
 	#fcdate='%d-%d-%d' % (todt.year, todt.month, todt.day)
 	fcdate='%d-%d-%d' % (fcdatetime.year, fcdatetime.month, fcdatetime.day)
-	print "hazMapTo() complete. ", todt, "  :  ",  fcdatetime
+	print("hazMapTo() complete. ", todt, "  :  ",  fcdatetime)
 	#
 	magres=objHM.guessMag(nsquares=1, mc=mc, deltas=2.0, beta=1.0, rblen=winlen, dithers=ndithers**2)
 	magresDith=objHM.guessMag(nsquares=ndithers**2, mc=mc, deltas=2.0, beta=1.0, rblen=winlen, dithers=ndithers**2)
-	print "mag-res: %f/%f (dithering=%d)" % (magres, magresDith, ndithers)
+	print("mag-res: %f/%f (dithering=%d)" % (magres, magresDith, ndithers))
 	#
 	plt.figure(fignum)
 	objHM.simpleBoxes(fignum=fignum, thresh=thresh)
@@ -1533,7 +1532,7 @@ def getNsample(targmag, mc, mt=7.6, dm=1.0, dms=1.0, doreduce=False):
 	#
 	if doreduce==True:
 		winlen=int(round(winlen,-1))
-		#print "winlen0: %d" % winlen
+		#print("winlen0: %d" % winlen)
 		if winlen<1: winlen=1
 	#
 	return winlen
@@ -1555,7 +1554,7 @@ def precursorAnalyzer(objCat, mc=None, dt0=None, winlen=None, targmag=None, fign
 	T  = rbdataT[1]
 	Tf = map(mpd.date2num, rbdataT[1])
 	#
-	print "targmag, winlen, meanlen: ", targmag, winlen, meanLen, len(Rlogs)
+	print("targmag, winlen, meanlen: ", targmag, winlen, meanLen, len(Rlogs))
 	#
 	RlogsMean =  []
 	RlogsMeanG = []
@@ -1589,7 +1588,7 @@ def precursorAnalyzer(objCat, mc=None, dt0=None, winlen=None, targmag=None, fign
 	trendMaxs.reverse()
 	trendMins.sort()
 	trendMins.reverse()
-	print "max-min lens: ", len(trendMaxs), len(trendMins)
+	print("max-min lens: ", len(trendMaxs), len(trendMins))
 	plt.plot(trendMaxs, range(1, len(trendMaxs)+1), 'b.-', label='Omori')	
 	plt.plot(trendMins, range(1, len(trendMins)+1), 'g.-', label='PSA')
 	plt.legend(loc=0)
@@ -1611,8 +1610,8 @@ def precursorAnalyzer(objCat, mc=None, dt0=None, winlen=None, targmag=None, fign
 			meanlt+=r
 			Tlt+=dt
 			rltdt=r*dt
-	print "raw stats (ngt, nlt, sumgt, sumlt, Tgt, Tlt, sum(rgtdt), sum(rltdt)): ", ngt, nlt, meangt, meanlt, Tgt, Tlt, rgtdt, rltdt
-	print "normalized stats (meangt, meanlt, TmeanGT, TmeanLT): ", meangt/float(ngt), meanlt/float(nlt), rgtdt/(Tf[-1]-Tf[0]), rltdt/(Tf[-1]-Tf[0])
+	print("raw stats (ngt, nlt, sumgt, sumlt, Tgt, Tlt, sum(rgtdt), sum(rltdt)): ", ngt, nlt, meangt, meanlt, Tgt, Tlt, rgtdt, rltdt)
+	print("normalized stats (meangt, meanlt, TmeanGT, TmeanLT): ", meangt/float(ngt), meanlt/float(nlt), rgtdt/(Tf[-1]-Tf[0]), rltdt/(Tf[-1]-Tf[0]))
 	#
 	# get r>1 and r<1 clusters.
 	#
@@ -1625,7 +1624,7 @@ def precursorAnalyzer(objCat, mc=None, dt0=None, winlen=None, targmag=None, fign
 	# "signal 1:" (experimental acor*r(t))
 	sig1=scipy.array(acor1)*scipy.array(RlogsMean[acorlen:])
 	#
-	print "lens: ", len(RlogsMean)
+	print("lens: ", len(RlogsMean))
 	rbursts=getrbursts(RlogsMean)
 	#
 	plt.figure(fignum)
@@ -1638,7 +1637,7 @@ def precursorAnalyzer(objCat, mc=None, dt0=None, winlen=None, targmag=None, fign
 	#plt.plot(Tf, Rlogs, 'r--')
 	plt.plot(Tf[meanLen:], RlogsMean, 'b.-')
 	#plt.plot(Tf[meanLen:], RlogsMeanG, 'g.-')
-	#print len(Tf[meanLen+1:]), len(acro1)
+	#print(len(Tf[meanLen+1:]), len(acro1))
 	plt.plot(Tf[meanLen+acorlen:], acor1, 'm.-')
 	plt.plot(Tf[meanLen+acorlen:], sig1, 'c.-')
 	#
@@ -1784,7 +1783,7 @@ def chilehm2014(catname='cats/chile.cat', catnum=0, mc=5.0, gridsize=None, ndith
 	# there do not appear to be sufficient data to draw a precursory HM, but the RBTS come out beautifully.
 	#
 	'''
-	print "getting chilehm.", lats, lons
+	print("getting chilehm.", lats, lons)
 	#
 	z=generalHazmap(catname=catname, catnum=catnum, mc=mc, gridsize=gridsize, ndithers=ndithers, winlen=winlen, sigma=sigma, avlen=avlen, bigmag=bigmag, fignum=fignum, todt=todt, epicen=epicen, thresh=thresh, refreshcat=refreshcat, lats=lats, lons=lons)
 	plt.figure(3)
@@ -1809,7 +1808,7 @@ def chilehm(catname='cats/chile.cat', catnum=0, mc=4.5, gridsize=None, ndithers=
 	#if refresh_cat:
 	#	catalog = atp.catfromANSS(lon=lons, lat=lats, minMag=mc, dates0=[dtm.datetime(2000,01,01, tzinfo=atp.tzutc), None], Nmax=None, fout=catname, rec_array=True)
 	#
-	print "getting chilehm.", lats, lons
+	print("getting chilehm.", lats, lons)
 	#
 	z=generalHazmap(catname=catname, catnum=catnum, mc=mc, gridsize=gridsize, ndithers=ndithers, winlen=winlen, sigma=sigma, avlen=avlen, bigmag=bigmag, fignum=fignum, todt=todt, epicen=epicen, thresh=thresh, refreshcat=refreshcat, lats=lats, lons=lons)
 	plt.figure(3)
@@ -1918,7 +1917,7 @@ def saltonstuff(dorefresh=False, todt=dtm.datetime.now(pytz.timezone('UTC')), fr
 	logZ = math.log10(float(thiswinlen))		# log-normalization factor (so -1 < r < 1 )
 																# note: we're plotting r in log space, so the quantity in question
 	logZinv = 1.0/math.log10(float(thiswinlen))															# is log(n1/n2)/log(N)
-	print "logZ: %f, %f" % (logZ, logZinv)
+	print("logZ: %f, %f" % (logZ, logZinv))
 	#
 	rbarrays = q.contourArrays()
 	#
@@ -2066,13 +2065,13 @@ def findClusters(gridlist=[], L=None):
 			L=squareL
 		else:
 			# we don't know how to parse it.
-			print "array width not defined."
+			print("array width not defined.")
 			return None
 	#
 	clustIndex=0
 	#
 	i=0
-	print "L=%d" % L
+	print("L=%d" % L)
 	while i<gridlen:
 		if mygridlist[i]==None or mygridlist[i]<=0:
 			clusterIDs+=[None]
